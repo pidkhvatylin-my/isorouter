@@ -1,0 +1,6 @@
+dist
+coverage
+playwright-report
+test-results
+.svelte-kit
+*.tgz

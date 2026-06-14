@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.svelte-kit/
+*.tsbuildinfo
+
+# Test artifacts
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Packaging artifacts (npm pack / publint)
+*.tgz
+
+# Logs & debug
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Editor & OS
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "pidkhvatylin-my/isorouter" }
+  ],
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    [
+      "@isorouter/core",
+      "@isorouter/react",
+      "@isorouter/svelte",
+      "@isorouter/vue"
+    ]
+  ],
+  "access": "public",
+  "baseBranch": "master",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@isorouter/test-utils"]
+}

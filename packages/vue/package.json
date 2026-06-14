@@ -1,0 +1,75 @@
+{
+  "name": "@isorouter/vue",
+  "version": "1.0.0",
+  "description": "Vue 3 adapter for @isorouter/core.",
+  "license": "MIT",
+  "author": "Mykhailo Pidkhvatylin <michel.podkhvatilin@gmail.com>",
+  "homepage": "https://github.com/pidkhvatylin-my/isorouter/tree/master/packages/vue#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pidkhvatylin-my/isorouter.git",
+    "directory": "packages/vue"
+  },
+  "bugs": "https://github.com/pidkhvatylin-my/isorouter/issues",
+  "keywords": [
+    "router",
+    "routing",
+    "spa",
+    "navigation-api",
+    "vue",
+    "typescript"
+  ],
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist && rolldown -c && tsc -p tsconfig.build.json",
+    "check": "tsc --noEmit && publint && eslint . && prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test && npm run test:e2e"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "dependencies": {
+    "@isorouter/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@isorouter/test-utils": "^1.0.0",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^24.13.2",
+    "@vitest/coverage-v8": "^4.1.0",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jsdom": "^29.1.1",
+    "prettier": "^3.8.4",
+    "publint": "^0.3.0",
+    "rolldown": "^1.1.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.61.0",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0",
+    "vue": "^3.4.0"
+  }
+}
