@@ -1,6 +1,7 @@
 # @isorouter/react
 
 [![npm version](https://img.shields.io/npm/v/%40isorouter%2Freact.svg)](https://www.npmjs.com/package/@isorouter/react)
+[![minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Freact?label=gzip)](https://bundlephobia.com/package/@isorouter/react)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 React bindings for

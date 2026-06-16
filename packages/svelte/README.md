@@ -1,6 +1,7 @@
 # @isorouter/svelte
 
 [![npm version](https://img.shields.io/npm/v/%40isorouter%2Fsvelte.svg)](https://www.npmjs.com/package/@isorouter/svelte)
+[![minzip](https://img.shields.io/badge/gzip-~2.3%20KB-blue.svg)](https://www.npmjs.com/package/@isorouter/svelte)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Svelte 5 bindings for

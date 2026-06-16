@@ -1,10 +1,30 @@
-# isorouter
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo.svg">
+    <img src="public/logo-light.svg" alt="isorouter logo" width="120" height="120">
+  </picture>
+</p>
+
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/wordmark.svg">
+    <img src="public/wordmark-light.svg" alt="isorouter" height="56">
+  </picture>
+</h1>
 
 [![CI](https://github.com/pidkhvatylin-my/isorouter/actions/workflows/ci.yml/badge.svg)](https://github.com/pidkhvatylin-my/isorouter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://pidkhvatylin-my.github.io/isorouter/)
+
+[![core minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Fcore?label=core%20gzip)](https://bundlephobia.com/package/@isorouter/core)
+[![react minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Freact?label=react%20gzip)](https://bundlephobia.com/package/@isorouter/react)
+[![vue minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Fvue?label=vue%20gzip)](https://bundlephobia.com/package/@isorouter/vue)
+[![svelte gzip](https://img.shields.io/badge/svelte%20gzip-~2.3%20KB-blue.svg)](https://www.npmjs.com/package/@isorouter/svelte)
 
 A lightweight, **framework-agnostic SPA router built on the browser
 [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation_API)**.
+
+📖 **[Documentation](https://pidkhvatylin-my.github.io/isorouter/)** — guide, framework adapters and full API reference.
 
 The interception, matching, guards, lazy-loading and async-commit state machine
 live in a pure-TypeScript core with **zero framework dependencies**. Thin
