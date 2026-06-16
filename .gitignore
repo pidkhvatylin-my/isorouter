@@ -6,6 +6,10 @@ dist/
 .svelte-kit/
 *.tsbuildinfo
 
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # Test artifacts
 coverage/
 playwright-report/

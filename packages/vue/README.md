@@ -1,6 +1,7 @@
 # @isorouter/vue
 
 [![npm version](https://img.shields.io/npm/v/%40isorouter%2Fvue.svg)](https://www.npmjs.com/package/@isorouter/vue)
+[![minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Fvue?label=gzip)](https://bundlephobia.com/package/@isorouter/vue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Vue 3 bindings for

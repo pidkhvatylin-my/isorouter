@@ -1,6 +1,7 @@
 # @isorouter/core
 
 [![npm version](https://img.shields.io/npm/v/%40isorouter%2Fcore.svg)](https://www.npmjs.com/package/@isorouter/core)
+[![minzip](https://img.shields.io/bundlephobia/minzip/%40isorouter%2Fcore?label=gzip)](https://bundlephobia.com/package/@isorouter/core)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 A lightweight, **framework-agnostic SPA router built on the browser
@@ -15,11 +16,12 @@ directly, or through a thin adapter:
 
 ## Size
 
-A single unminified ESM file, **8.3 KB (3.1 KB gzipped)**, with **zero
-runtime dependencies** and `"sideEffects": false` for full tree-shaking —
-your bundler's own minification shrinks it further. The published npm
-package (incl. type declarations, README and LICENSE) is ~9 KB packed / ~25
-KB unpacked across 9 files.
+A single ESM file — **~4 KB minified, 1.8 KB gzipped**
+([Bundlephobia](https://bundlephobia.com/package/@isorouter/core)) — with
+**zero runtime dependencies** and `"sideEffects": false` for full
+tree-shaking. The unminified source is 8.3 KB; the published npm package
+(incl. type declarations, README and LICENSE) is ~9 KB packed / ~25 KB
+unpacked across 9 files.
 
 ## Install
 
