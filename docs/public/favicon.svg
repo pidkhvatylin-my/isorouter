@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="isorouter">
+  <polyline points="24,80 24,52 76,52 76,44" fill="none" stroke="#22D3EE" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  <circle cx="50" cy="52" r="11" fill="#F472B6"></circle>
+  <circle cx="76" cy="24" r="9" fill="#EC4899"></circle>
+</svg>
