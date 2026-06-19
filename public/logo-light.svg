@@ -1,10 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="isorouter">
-  
-  <polygon points="15.4,30 50,50 50,90 15.4,70" fill="#0C1D35"></polygon>
-  <polygon points="84.6,30 84.6,70 50,90 50,50" fill="#173462"></polygon>
-  <polygon points="50,10 84.6,30 50,50 15.4,30" fill="#7B8EFB"></polygon>
-  <polyline points="50,10 84.6,30 50,50 15.4,30 50,10" fill="none" stroke="#4A5CE8" stroke-width="1.3" stroke-linejoin="round"></polyline>
-  <polyline points="84.6,30 84.6,70 50,90 15.4,70 15.4,30" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="0.8"></polyline>
-  <line x1="50" y1="90" x2="50" y2="50" stroke="rgba(0,0,0,0.1)" stroke-width="0.8"></line>
-  <circle cx="50" cy="50" r="4.5" fill="white"></circle>
+  <defs>
+    <linearGradient id="iso-line-l" x1="22" y1="80" x2="78" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0891B2"></stop>
+      <stop offset="1" stop-color="#4F46E5"></stop>
+    </linearGradient>
+  </defs>
+  <polyline points="22,80 22,50 78,50 78,38" fill="none" stroke="url(#iso-line-l)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>
+  <circle cx="22" cy="80" r="6" fill="#0891B2"></circle>
+  <circle cx="50" cy="50" r="8" fill="#DB2777"></circle>
+  <circle cx="78" cy="22" r="6.5" fill="#BE185D"></circle>
 </svg>
