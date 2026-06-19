@@ -49,6 +49,7 @@ export default defineConfig({
     nav: [
       { text: "Guide", link: "/guide/introduction", activeMatch: "/guide/" },
       { text: "API", link: "/api/core", activeMatch: "/api/" },
+      { text: "FAQ", link: "/guide/faq" },
       {
         text: "Frameworks",
         items: [
@@ -78,6 +79,7 @@ export default defineConfig({
           text: "Introduction",
           items: [
             { text: "What is isorouter?", link: "/guide/introduction" },
+            { text: "Comparison", link: "/guide/comparison" },
             { text: "Installation", link: "/guide/installation" },
             { text: "Quick start", link: "/guide/quick-start" },
           ],
@@ -96,6 +98,10 @@ export default defineConfig({
             },
             { text: "Browser support", link: "/guide/browser-support" },
           ],
+        },
+        {
+          text: "Help",
+          items: [{ text: "FAQ", link: "/guide/faq" }],
         },
       ],
       "/frameworks/": [
