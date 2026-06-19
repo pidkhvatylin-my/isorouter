@@ -1,44 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;600&display=swap');
+
 /**
- * Brand palette — derived from the logo (periwinkle cube accent #7B8EFB /
- * highlight #9EABFC; light-theme stroke #4A5CE8). Drives links, buttons, the
- * hero gradient and active nav state so the whole site matches the mark.
+ * Brand palette — cyan→indigo gradient line, magenta nodes (synthwave / midnight-cyber).
+ * Drives links, buttons, the hero gradient and active nav state.
  */
 :root {
-  --vp-c-brand-1: #4a5ce8;
-  --vp-c-brand-2: #5a6cf5;
-  --vp-c-brand-3: #7b8efb;
-  --vp-c-brand-soft: rgba(123, 142, 251, 0.14);
+  --vp-c-brand-1: #4F46E5;
+  --vp-c-brand-2: #6366F1;
+  --vp-c-brand-3: #818CF8;
+  --vp-c-brand-soft: rgba(99, 102, 241, 0.14);
 
-  /* Home hero gradient on the (replaced) wordmark / accents. */
   --vp-home-hero-name-color: var(--vp-c-brand-1);
 }
 
 .dark {
-  --vp-c-brand-1: #9eabfc;
-  --vp-c-brand-2: #7b8efb;
-  --vp-c-brand-3: #6b7cfb;
-  --vp-c-brand-soft: rgba(123, 142, 251, 0.18);
+  --vp-c-brand-1: #22D3EE;
+  --vp-c-brand-2: #67E8F9;
+  --vp-c-brand-3: #A5F3FC;
+  --vp-c-brand-soft: rgba(34, 211, 238, 0.18);
+
+  /* Cyan is too bright for white text — use dark text on brand buttons */
+  --vp-button-brand-text: #0A0712;
+  --vp-button-brand-hover-text: #0A0712;
+  --vp-button-brand-active-text: #0A0712;
 }
 
 /**
- * The "isorouter" wordmark: "iso" in the brand accent, "router" in the
- * foreground colour — bold and tightly tracked, matching the logo guide.
+ * The "isorouter" wordmark: "iso" weight 300 muted, "router" weight 600 full-strength.
+ * Matches the design handoff typography spec (Space Grotesk, tracking −0.04em).
  */
 .iso-wordmark {
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.04em;
   white-space: nowrap;
 }
 
 .iso-wordmark .iso {
-  color: var(--vp-c-brand-1);
+  font-weight: 400;
+  background: linear-gradient(to right, #06B6D4, #DB2777);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .iso-wordmark .iso {
+  background: linear-gradient(to right, #22D3EE, #EC4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .iso-wordmark .rest {
-  color: var(--vp-c-text-1);
+  font-weight: 600;
+  color: #14131A;
 }
 
-/* In the nav bar, sit next to the cube logo. */
+.dark .iso-wordmark .rest {
+  color: #F4F5FB;
+}
+
+/* In the nav bar, sit next to the relay logo. */
 .VPNavBarTitle .iso-wordmark {
   font-size: 18px;
   margin-left: 8px;

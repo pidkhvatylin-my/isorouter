@@ -18,7 +18,7 @@ export default defineConfig({
   metaChunk: true,
 
   head: [
-    ["meta", { name: "theme-color", content: "#646cff" }],
+    ["meta", { name: "theme-color", content: "#6366F1" }],
     ["meta", { property: "og:type", content: "website" }],
     ["meta", { property: "og:title", content: "isorouter" }],
     ["meta", { property: "og:description", content: ogDescription }],
@@ -28,7 +28,7 @@ export default defineConfig({
     ["meta", { name: "twitter:description", content: ogDescription }],
     [
       "link",
-      { rel: "icon", type: "image/svg+xml", href: "/isorouter/logo.svg" },
+      { rel: "icon", type: "image/svg+xml", href: "/isorouter/favicon.svg" },
     ],
   ],
 
