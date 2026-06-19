@@ -1,6 +1,15 @@
+/**
+ * Baseline specification for `matchRoutes`.
+ *
+ * Covers the canonical behaviour of every feature in isolation: static paths,
+ * specificity ranking, dynamic params, splat capture, index routes, nested
+ * layouts, path normalisation, and pathless wrappers. Each case is the minimum
+ * reproducer for its contract.
+ */
+
 import { describe, expect, it } from "vitest";
-import { matchRoutes } from "../../src/matcher";
-import type { RouteConfig } from "../../src/types";
+import { matchRoutes } from "../../../src/matcher";
+import type { RouteConfig } from "../../../src/types";
 
 describe("matchRoutes", () => {
   it("matches a static route", () => {
