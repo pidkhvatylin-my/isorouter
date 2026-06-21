@@ -27,7 +27,7 @@ type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 | ----------------- | ----------------------------------------------------- |
 | `undefined` / `true` | **Allow** the navigation.                          |
 | `false`           | **Block** — the current URL is restored.              |
-| `string`          | **Redirect** (via `replace`) to that path.            |
+| `string`          | **Redirect** (via `replace`) to that **same-origin** path. |
 
 ```ts twoslash
 import { createCoreRouter } from "@isorouter/core";
@@ -45,6 +45,15 @@ const router = createCoreRouter([
   },
 ] as const);
 ```
+
+::: warning Same-origin only
+A redirect string must resolve to the **same origin**. If a guard returns a
+cross-origin target (including protocol-relative `//host` or `javascript:` URLs),
+the router throws instead of navigating and the snapshot moves to
+`status: "error"` — this closes the open-redirect class where a user-derived
+`?next=` could send visitors to an external site. Same-origin and relative paths
+are unaffected.
+:::
 
 ## Async guards & the abort signal
 

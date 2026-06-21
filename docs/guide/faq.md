@@ -185,10 +185,15 @@ leaf and may be `async`. See [Navigation guards](./guards).
 
 ### How do I redirect safely?
 
-Return a path string from `beforeLoad`. If the redirect target is derived from
-user input (e.g. a `?next=` query param), **validate it yourself** — restrict it
-to a same-origin or relative path before returning it, exactly as you would with
-any server-side redirect. Don't hand an unchecked external URL to a redirect.
+Return a path string from `beforeLoad`. Redirects are restricted to **same-origin**
+targets: if a guard returns a cross-origin string (e.g. a `?next=https://evil.com`
+query param), the router throws instead of navigating — the snapshot goes to
+`status: "error"` rather than open-redirecting to the external site. So an
+unchecked `?next=` can't be turned into an open redirect.
+
+You should still validate user-derived targets against an allowlist of known
+paths if you want to control *which* same-origin routes are reachable — the
+origin check stops external redirects, not arbitrary internal ones.
 
 ### What is `ctx.signal` for?
 

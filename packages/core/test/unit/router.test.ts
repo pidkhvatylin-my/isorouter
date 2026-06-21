@@ -307,6 +307,28 @@ describe("guards", () => {
     expect(snapshot.components).toEqual(["about"]);
   });
 
+  it("rejects a cross-origin redirect from a guard instead of navigating away", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "evil", beforeLoad: () => "https://evil.com" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const onError = vi.fn();
+    const router = new Router(routes, { onError });
+
+    router.start();
+    await flush();
+    router.navigate("/evil");
+    await flush();
+
+    const snapshot = router.getSnapshot();
+    expect(snapshot.status).toBe("error");
+    expect(snapshot.url.origin).not.toBe("https://evil.com");
+    expect(onError).toHaveBeenCalledOnce();
+    expect((onError.mock.calls[0][0] as Error).message).toMatch(
+      /cross-origin redirect/,
+    );
+  });
+
   it("sets status to 'error' and calls onError when a guard throws", async () => {
     const boom = new Error("boom");
     const routes = [

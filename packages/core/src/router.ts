@@ -230,6 +230,18 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         }
 
         if (typeof result === "string") {
+          // Guard strings may be user-derived (e.g. a ?next= param); reject
+          // cross-origin targets so a guard can't be turned into an open
+          // redirect. Resolving against the current URL also catches
+          // protocol-relative (//evil.com) and opaque (javascript:) targets,
+          // whose origin won't match. Same-origin / relative paths pass through.
+          const target = new URL(result, this.#snapshot.url.href);
+          if (target.origin !== this.#snapshot.url.origin)
+            throw new Error(
+              `[isorouter] beforeLoad returned a cross-origin redirect ` +
+                `("${result}"); only same-origin paths are allowed`,
+            );
+
           this.#navigateRaw(result, true); // redirect
           return;
         }
