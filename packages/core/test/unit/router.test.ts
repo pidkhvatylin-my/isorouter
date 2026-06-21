@@ -557,6 +557,26 @@ describe("isActive", () => {
   });
 });
 
+describe("normalizePath (trailing-slash stripping)", () => {
+  const routes = [
+    { path: "/", component: "home" },
+    { path: "foo", component: "foo" },
+  ] as const satisfies readonly RouteConfig<string>[];
+
+  it.each([
+    ["/foo/", "/foo", "strips single trailing slash"],
+    ["/foo///", "/foo", "strips multiple trailing slashes"],
+    ["/", "/", "root stays root"],
+    ["/foo", "/foo", "no trailing slash — no-op"],
+  ])("isActive treats %s same as %s (%s)", async (withSlash, withoutSlash) => {
+    const router = new Router(routes);
+    router.start();
+    await flush();
+
+    expect(router.isActive(withSlash)).toBe(router.isActive(withoutSlash));
+  });
+});
+
 describe("title", () => {
   it("applies the deepest title in the matched chain", async () => {
     const routes = [

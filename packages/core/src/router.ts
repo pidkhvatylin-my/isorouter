@@ -31,7 +31,9 @@ function initialUrl(): URL {
 }
 
 function normalizePath(p: string): string {
-  return p.replace(/\/+$/, "") || "/";
+  let end = p.length;
+  while (end > 0 && p.charCodeAt(end - 1) === 47 /* "/" */) end--;
+  return end === 0 ? "/" : p.slice(0, end);
 }
 
 /**
