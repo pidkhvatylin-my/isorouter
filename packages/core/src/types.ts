@@ -1,3 +1,8 @@
+/**
+ * Shared types for @isorouter/core: route config, guard context, router
+ * options/snapshot, and compile-time path-template utilities.
+ */
+
 import type { LazyComponent } from "./lazy";
 
 export type Awaitable<T> = T | Promise<T>;
@@ -14,10 +19,10 @@ export interface GuardContext {
 }
 
 /**
- * Navigation guard. Runs root -> leaf before the matched components commit.
- *  - `undefined` / `true` -> allow
- *  - `false`              -> block (current URL is restored)
- *  - `string`             -> redirect (replace) to that path
+ * Navigation guard. Runs root → leaf before the matched components commit.
+ *  - `undefined` / `true` → allow
+ *  - `false`              → block (current URL is restored)
+ *  - `string`             → redirect (replace) to that path
  */
 export type BeforeLoad = (
   ctx: GuardContext,
@@ -53,9 +58,7 @@ export interface RouteMatch<C = unknown> {
   params: Record<string, string>;
 }
 
-/* ------------------------------------------------------------------ *
- * Compile-time path templates (independent of the component type C).
- * ------------------------------------------------------------------ */
+// ─── Compile-Time Path Templates ──────────────────────────────────────────────
 
 type SegParam<Seg extends string> = Seg extends `:${infer P extends string}`
   ? Record<P, string>
@@ -63,7 +66,7 @@ type SegParam<Seg extends string> = Seg extends `:${infer P extends string}`
     ? Record<"*", string>
     : Record<never, never>;
 
-/** `ExtractParams<'/concerts/:city'>` -> `{ city: string }` */
+/** `ExtractParams<'/concerts/:city'>` → `{ city: string }` */
 export type ExtractParams<Path extends string> =
   Path extends `${infer Seg}/${infer Rest}`
     ? SegParam<Seg> & ExtractParams<Rest>

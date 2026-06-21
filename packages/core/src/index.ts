@@ -1,3 +1,5 @@
+/** Public surface / barrel export for @isorouter/core. */
+
 export {
   Router,
   createCoreRouter,

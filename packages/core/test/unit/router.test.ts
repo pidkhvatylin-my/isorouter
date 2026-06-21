@@ -1,3 +1,12 @@
+/**
+ * Integration tests for `Router` / `createCoreRouter` from @isorouter/core.
+ *
+ * Uses `FakeNavigation` from `@isorouter/test-utils` to drive the Navigation
+ * API without a real browser, covering the full lifecycle: start/stop, guard
+ * execution (root → leaf), lazy loading, abort races, and the external-store
+ * contract.
+ */
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { lazy } from "../../src/lazy";
 import { createCoreRouter, Router } from "../../src/router";

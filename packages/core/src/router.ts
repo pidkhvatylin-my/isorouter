@@ -1,3 +1,12 @@
+/**
+ * Framework-agnostic router implementation for @isorouter/core.
+ *
+ * Wires the Navigation API to the route-matching algorithm: intercepts
+ * `navigate` events, runs `beforeLoad` guards (root → leaf), resolves lazy
+ * components, and publishes immutable snapshots to subscribers so it can plug
+ * directly into `useSyncExternalStore`, `createSubscriber`, `shallowRef`, etc.
+ */
+
 import { isLazy, type LazyComponent } from "./lazy";
 import { matchRoutes } from "./matcher";
 
@@ -9,6 +18,8 @@ import type {
   RouterOptions,
   RouterSnapshot,
 } from "./types";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export type Unsubscribe = () => void;
 
@@ -23,11 +34,12 @@ function normalizePath(p: string): string {
   return p.replace(/\/+$/, "") || "/";
 }
 
+// ─── Public API ───────────────────────────────────────────────────────────────
+
 /**
  * Framework-agnostic router built on the Navigation API.
  * Generic over the component type `C`; adapters fix `C` (Svelte/React/Vue).
- * State is published as an immutable snapshot (stable reference until it changes)
- * so it plugs into `useSyncExternalStore`, `createSubscriber`, `shallowRef`, etc.
+ * State is published as an immutable snapshot (stable reference until it changes).
  */
 export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
   readonly routes: T;
@@ -50,7 +62,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     };
   }
 
-  /* ---------------- external-store contract ---------------- */
+  // ─── External-Store Contract ──────────────────────────────────────────────
 
   subscribe = (fn: (s: RouterSnapshot<C>) => void): Unsubscribe => {
     this.#subs.add(fn);
@@ -67,7 +79,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     for (const fn of this.#subs) fn(this.#snapshot);
   }
 
-  /* ---------------- lifecycle ---------------- */
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   start(): void {
     if (this.#started || !globalThis.navigation) return;
@@ -83,7 +95,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     globalThis.navigation?.removeEventListener("navigate", this.#listener);
   }
 
-  /* ---------------- imperative navigation ---------------- */
+  // ─── Imperative Navigation ────────────────────────────────────────────────
 
   navigate(
     to: NavTarget<T>,
@@ -114,7 +126,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     return result;
   }
 
-  /* ---------------- active-link helper ---------------- */
+  // ─── Active-Link Helper ───────────────────────────────────────────────────
 
   isActive(href: string, opts: { exact?: boolean } = {}): boolean {
     const target = normalizePath(
@@ -125,7 +137,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     return path === target || path.startsWith(target + "/");
   }
 
-  /* ---------------- interception ---------------- */
+  // ─── Interception ─────────────────────────────────────────────────────────
 
   #onNavigate(e: NavigateEvent): void {
     if (
@@ -145,7 +157,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     });
   }
 
-  /* ---------------- commit state machine ---------------- */
+  // ─── Commit State Machine ─────────────────────────────────────────────────
 
   async #commit(
     url: URL,
