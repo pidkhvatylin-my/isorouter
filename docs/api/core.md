@@ -156,7 +156,9 @@ type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 ```
 
 Return nothing/`true` to allow, `false` to block (current URL restored), or a
-`string` to redirect (`replace`). See [Navigation guards](../guide/guards).
+same-origin `string` to redirect (`replace`); a cross-origin string throws
+(`status: "error"`) rather than navigating. See
+[Navigation guards](../guide/guards).
 
 ## `lazy(loader)`
 
