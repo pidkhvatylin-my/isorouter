@@ -324,9 +324,8 @@ describe("guards", () => {
     expect(snapshot.status).toBe("error");
     expect(snapshot.url.origin).not.toBe("https://evil.com");
     expect(onError).toHaveBeenCalledOnce();
-    expect((onError.mock.calls[0][0] as Error).message).toMatch(
-      /cross-origin redirect/,
-    );
+    expect(snapshot.error).toBeInstanceOf(Error);
+    expect((snapshot.error as Error).message).toMatch(/cross-origin redirect/);
   });
 
   it("sets status to 'error' and calls onError when a guard throws", async () => {
