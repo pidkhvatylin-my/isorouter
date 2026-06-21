@@ -1,8 +1,17 @@
+/**
+ * Integration tests for `Router` / `createCoreRouter` from @isorouter/core.
+ *
+ * Uses `FakeNavigation` from `@isorouter/test-utils` to drive the Navigation
+ * API without a real browser, covering the full lifecycle: start/stop, guard
+ * execution (root → leaf), lazy loading, abort races, and the external-store
+ * contract.
+ */
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { FakeNavigation } from "@isorouter/test-utils";
 import { lazy } from "../../src/lazy";
 import { createCoreRouter, Router } from "../../src/router";
 import type { GuardContext, RouteConfig } from "../../src/types";
-import { FakeNavigation } from "@isorouter/test-utils";
 
 let nav: FakeNavigation;
 
@@ -176,8 +185,10 @@ describe("#onNavigate interception guards", () => {
     await flush();
 
     const before = router.getSnapshot();
-    // @virtualstate/navigation reports "" (not null) for plain <a> clicks —
-    // treating any non-null value as a download is intentional, see README.
+    // Per spec, `<a download>` (bare attribute) yields downloadRequest === ""
+    // — a genuine download — so any non-null value is skipped. (The
+    // @virtualstate/navigation polyfill separately reports "" for plain clicks
+    // too, which is why link clicks degrade to full-page nav under it; see README.)
     nav.dispatchNavigate({
       destinationUrl: "http://localhost/about",
       downloadRequest: "",
@@ -187,7 +198,7 @@ describe("#onNavigate interception guards", () => {
     expect(router.getSnapshot()).toBe(before);
   });
 
-  it("ignores same-document form submissions", async () => {
+  it("ignores POST form submissions", async () => {
     const router = new Router(basicRoutes);
     router.start();
     await flush();

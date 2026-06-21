@@ -1,3 +1,5 @@
+/** Public surface / barrel export for @isorouter/core. */
+
 export {
   Router,
   createCoreRouter,
@@ -19,4 +21,6 @@ export type {
   RouteTemplate,
   RouterOptions,
   RouterSnapshot,
+  RouterStatus,
+  ScrollMode,
 } from "./types";

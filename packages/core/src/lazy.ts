@@ -1,3 +1,8 @@
+/**
+ * Lazy-component wrapper for @isorouter/core.
+ * Boxes a dynamic `import()` call so the router can resolve and cache it on demand.
+ */
+
 const LAZY = Symbol.for("isorouter.lazy");
 
 export interface LazyComponent<C = unknown> {

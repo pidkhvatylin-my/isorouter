@@ -1,3 +1,8 @@
+/**
+ * Shared types for @isorouter/core: route config, guard context, router
+ * options/snapshot, and compile-time path-template utilities.
+ */
+
 import type { LazyComponent } from "./lazy";
 
 export type Awaitable<T> = T | Promise<T>;
@@ -14,10 +19,10 @@ export interface GuardContext {
 }
 
 /**
- * Navigation guard. Runs root -> leaf before the matched components commit.
- *  - `undefined` / `true` -> allow
- *  - `false`              -> block (current URL is restored)
- *  - `string`             -> redirect (replace) to that path
+ * Navigation guard. Runs root → leaf before the matched components commit.
+ *  - `undefined` / `true` → allow
+ *  - `false`              → block (current URL is restored)
+ *  - `string`             → redirect (replace) to that path
  */
 export type BeforeLoad = (
   ctx: GuardContext,
@@ -33,18 +38,24 @@ export interface RouteConfig<C = unknown> {
   children?: readonly RouteConfig<C>[];
 }
 
+/** Scroll handling after a committed navigation, forwarded to `intercept`. */
+export type ScrollMode = "after-transition" | "manual";
+
 export interface RouterOptions {
-  scroll?: "after-transition" | "manual";
+  scroll?: ScrollMode;
   onError?: (err: unknown) => void;
   onCommit?: (snapshot: RouterSnapshot<unknown>) => void;
 }
+
+/** Lifecycle state of the current navigation. */
+export type RouterStatus = "idle" | "navigating" | "not-found" | "error";
 
 export interface RouterSnapshot<C> {
   /** Components for the matched chain, in render order (component-less routes removed). */
   components: C[];
   params: Record<string, string>;
   url: URL;
-  status: "idle" | "navigating" | "not-found" | "error";
+  status: RouterStatus;
   error: unknown;
 }
 
@@ -53,9 +64,7 @@ export interface RouteMatch<C = unknown> {
   params: Record<string, string>;
 }
 
-/* ------------------------------------------------------------------ *
- * Compile-time path templates (independent of the component type C).
- * ------------------------------------------------------------------ */
+// ─── Compile-Time Path Templates ──────────────────────────────────────────────
 
 type SegParam<Seg extends string> = Seg extends `:${infer P extends string}`
   ? Record<P, string>
@@ -63,7 +72,7 @@ type SegParam<Seg extends string> = Seg extends `:${infer P extends string}`
     ? Record<"*", string>
     : Record<never, never>;
 
-/** `ExtractParams<'/concerts/:city'>` -> `{ city: string }` */
+/** `ExtractParams<'/concerts/:city'>` → `{ city: string }` */
 export type ExtractParams<Path extends string> =
   Path extends `${infer Seg}/${infer Rest}`
     ? SegParam<Seg> & ExtractParams<Rest>

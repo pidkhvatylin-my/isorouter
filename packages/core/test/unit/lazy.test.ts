@@ -1,3 +1,7 @@
+/**
+ * Unit tests for `lazy` and `isLazy` from @isorouter/core.
+ */
+
 import { describe, expect, it, vi } from "vitest";
 import { isLazy, lazy, type LazyComponent } from "../../src/lazy";
 
