@@ -1,6 +1,6 @@
 {
   "name": "@isorouter/core",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Framework-agnostic router built on the Navigation API.",
   "license": "MIT",
   "author": "Mykhailo Pidkhvatylin <michel.podkhvatilin@gmail.com>",

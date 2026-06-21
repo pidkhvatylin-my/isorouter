@@ -1,5 +1,14 @@
 # @isorouter/core
 
+## 1.1.0
+
+### Minor Changes
+
+- [#13](https://github.com/pidkhvatylin-my/isorouter/pull/13) [`b439dc7`](https://github.com/pidkhvatylin-my/isorouter/commit/b439dc7df9aad543c11dfe176a20066c98387e2b) Thanks [@pidkhvatylin-my](https://github.com/pidkhvatylin-my)! - Export `RouterStatus` and `ScrollMode` as named types. These were previously
+  inline string-literal unions on `RouterSnapshot.status` and `RouterOptions.scroll`;
+  naming and exporting them lets consumers reference the exact value sets directly
+  (e.g. when narrowing on `status` or typing a `scroll` option). No runtime change.
+
 ## 1.0.1
 
 ### Patch Changes
