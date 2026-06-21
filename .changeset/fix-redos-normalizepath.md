@@ -1,5 +1,8 @@
 ---
 "@isorouter/core": patch
+"@isorouter/react": patch
+"@isorouter/svelte": patch
+"@isorouter/vue": patch
 ---
 
 fix(core): harden normalizePath against ReDoS (CodeQL js/polynomial-redos)
