@@ -21,4 +21,6 @@ export type {
   RouteTemplate,
   RouterOptions,
   RouterSnapshot,
+  RouterStatus,
+  ScrollMode,
 } from "./types";

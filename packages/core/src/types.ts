@@ -38,18 +38,24 @@ export interface RouteConfig<C = unknown> {
   children?: readonly RouteConfig<C>[];
 }
 
+/** Scroll handling after a committed navigation, forwarded to `intercept`. */
+export type ScrollMode = "after-transition" | "manual";
+
 export interface RouterOptions {
-  scroll?: "after-transition" | "manual";
+  scroll?: ScrollMode;
   onError?: (err: unknown) => void;
   onCommit?: (snapshot: RouterSnapshot<unknown>) => void;
 }
+
+/** Lifecycle state of the current navigation. */
+export type RouterStatus = "idle" | "navigating" | "not-found" | "error";
 
 export interface RouterSnapshot<C> {
   /** Components for the matched chain, in render order (component-less routes removed). */
   components: C[];
   params: Record<string, string>;
   url: URL;
-  status: "idle" | "navigating" | "not-found" | "error";
+  status: RouterStatus;
   error: unknown;
 }
 

@@ -34,6 +34,21 @@ function normalizePath(p: string): string {
   return p.replace(/\/+$/, "") || "/";
 }
 
+/**
+ * Navigations the router must leave to the browser: cross-document or otherwise
+ * uninterceptable nav, in-page hash changes, downloads, and same-document form
+ * submissions (which should reach the server). Cheap boolean checks only — the
+ * origin check lives in #onNavigate since it needs the parsed destination URL.
+ */
+function shouldNotIntercept(e: NavigateEvent): boolean {
+  return (
+    !e.canIntercept ||
+    e.hashChange ||
+    e.downloadRequest != null || // download attr present: filename, or "" for bare `download`
+    e.formData != null // POST form submission carries an entry list — let it reach the server
+  );
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -48,7 +63,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
   #subs = new Set<(s: RouterSnapshot<C>) => void>();
   #commitAbort: AbortController | null = null;
   #started = false;
-  #listener = (e: Event) => this.#onNavigate(e as NavigateEvent);
+  #listener = (e: NavigateEvent) => this.#onNavigate(e);
 
   constructor(routes: T, options: RouterOptions = {}) {
     this.routes = routes;
@@ -66,6 +81,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
 
   subscribe = (fn: (s: RouterSnapshot<C>) => void): Unsubscribe => {
     this.#subs.add(fn);
+
     return () => {
       this.#subs.delete(fn);
     };
@@ -76,6 +92,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
 
   #emit(patch: Partial<RouterSnapshot<C>>): void {
     this.#snapshot = { ...this.#snapshot, ...patch };
+
     for (const fn of this.#subs) fn(this.#snapshot);
   }
 
@@ -83,14 +100,18 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
 
   start(): void {
     if (this.#started || !globalThis.navigation) return;
+
     this.#started = true;
+
     navigation.addEventListener("navigate", this.#listener);
     void this.#commit(new URL(location.href), "reload");
   }
 
   stop(): void {
     if (!this.#started) return;
+
     this.#started = false;
+
     this.#commitAbort?.abort();
     globalThis.navigation?.removeEventListener("navigate", this.#listener);
   }
@@ -105,6 +126,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       throw new Error(
         "[isorouter] Navigation API unavailable — load a polyfill",
       );
+
     return this.#navigateRaw(to, opts.replace ?? false, opts.state);
   }
 
@@ -122,7 +144,9 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       state,
       info,
     });
+
     result.finished?.catch(NOOP); // swallow AbortError when superseded/cancelled
+
     return result;
   }
 
@@ -133,22 +157,19 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       new URL(href, this.#snapshot.url.origin).pathname,
     );
     const path = normalizePath(this.#snapshot.url.pathname);
+
     if (opts.exact || target === "/") return path === target;
+
     return path === target || path.startsWith(target + "/");
   }
 
   // ─── Interception ─────────────────────────────────────────────────────────
 
   #onNavigate(e: NavigateEvent): void {
-    if (
-      !e.canIntercept ||
-      e.hashChange ||
-      e.downloadRequest != null || // string (incl. "") for downloads; null/undefined otherwise
-      e.formData // let same-document form submissions hit the server
-    )
-      return;
+    if (shouldNotIntercept(e)) return;
 
     const url = new URL(e.destination.url);
+
     if (url.origin !== location.origin) return;
 
     e.intercept({
@@ -165,11 +186,13 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     external?: AbortSignal,
   ): Promise<void> {
     this.#commitAbort?.abort();
-    const ac = new AbortController();
-    this.#commitAbort = ac;
-    external?.addEventListener("abort", () => ac.abort(), { once: true });
-    const { signal } = ac;
 
+    const abortController = new AbortController();
+    this.#commitAbort = abortController;
+
+    external?.addEventListener("abort", () => abortController.abort(), {
+      once: true,
+    });
     this.#emit({ status: "navigating" });
 
     try {
@@ -190,18 +213,22 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         params: matched.params,
         url,
         pathname: url.pathname,
-        signal,
+        signal: abortController.signal,
         navigationType,
       };
 
       for (const route of matched.chain) {
         if (!route.beforeLoad) continue;
+
         const result = await route.beforeLoad(ctx);
-        if (signal.aborted) return;
+
+        if (abortController.signal.aborted) return;
+
         if (result === false) {
           this.#navigateRaw(this.#snapshot.url.href, true); // restore
           return;
         }
+
         if (typeof result === "string") {
           this.#navigateRaw(result, true); // redirect
           return;
@@ -209,7 +236,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       }
 
       const components = await this.#resolve(matched.chain);
-      if (signal.aborted) return;
+      if (abortController.signal.aborted) return;
 
       this.#emit({
         components,
@@ -218,10 +245,12 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         status: "idle",
         error: null,
       });
+
       this.#applyTitle(matched.chain, ctx);
       this.#options.onCommit?.(this.#snapshot);
     } catch (err) {
-      if (signal.aborted) return;
+      if (abortController.signal.aborted) return;
+
       this.#emit({
         components: [],
         params: {},
@@ -238,11 +267,15 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       (r): r is RouteConfig<C> & { component: C | LazyComponent<C> } =>
         r.component != null,
     );
+
     return Promise.all(
       withComponent.map(async (r) => {
         const comp = r.component;
+
         if (!isLazy(comp)) return comp;
+
         comp.resolved ??= (await comp.load()).default;
+
         return comp.resolved;
       }),
     );
@@ -250,10 +283,14 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
 
   #applyTitle(chain: RouteConfig<C>[], ctx: GuardContext): void {
     if (typeof document === "undefined") return;
+
     for (let i = chain.length - 1; i >= 0; i--) {
       const t = chain[i]!.title;
+
       if (t == null) continue;
+
       document.title = typeof t === "function" ? t(ctx) : t;
+
       return;
     }
   }
