@@ -1,5 +1,16 @@
 # @isorouter/core
 
+## 1.1.2
+
+### Patch Changes
+
+- [#18](https://github.com/pidkhvatylin-my/isorouter/pull/18) [`afd7194`](https://github.com/pidkhvatylin-my/isorouter/commit/afd7194870079632852253c2203582e71cdee86b) Thanks [@pidkhvatylin-my](https://github.com/pidkhvatylin-my)! - fix(core): harden normalizePath against ReDoS (CodeQL js/polynomial-redos)
+
+  Replace the `/\/+$/` regex in `normalizePath` with a linear index-scan. The
+  regex was quadratic on slash-heavy strings that don't reach end-of-string —
+  reachable via `URL.pathname` (which does not collapse slashes) in both
+  `isActive` callers.
+
 ## 1.1.1
 
 ### Patch Changes
