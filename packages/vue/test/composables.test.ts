@@ -147,7 +147,7 @@ describe("useNavigate", () => {
     const navigateSpy = vi.spyOn(router, "navigate");
     const { result: navigate } = mountWithRouter(router, () => useNavigate());
 
-    navigate("/about" as never, { replace: true });
+    navigate("/about", { replace: true });
 
     expect(navigateSpy).toHaveBeenCalledWith("/about", { replace: true });
   });

@@ -154,7 +154,7 @@ describe("useNavigate", () => {
     expect(result.current).toBe(first);
 
     act(() => {
-      result.current("/about" as never, {
+      result.current("/about", {
         replace: true,
         state: { from: "test" },
       });

@@ -18,6 +18,5 @@ export function getOutletContext(): OutletContext {
 }
 
 export function getRouter(): RegisteredRouter {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return getOutletContext().router as unknown as RegisteredRouter;
 }

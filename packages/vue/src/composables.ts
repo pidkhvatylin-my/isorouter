@@ -20,7 +20,6 @@ export function useRouterState(): ShallowRef<RouterSnapshot<VueComponentType>> {
 }
 
 export function useRouter(): RegisteredRouter {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return injectRouter() as unknown as RegisteredRouter;
 }
 

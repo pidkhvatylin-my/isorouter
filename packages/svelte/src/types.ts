@@ -1,4 +1,4 @@
-import type { RouteConfig } from "@isorouter/core";
+import type { ResolveRegister, RouteConfig } from "@isorouter/core";
 import type { Component } from "svelte";
 
 import type { SvelteRouter } from "./reactive.svelte";
@@ -13,8 +13,4 @@ export type AnySvelteRouter = SvelteRouter<
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface Register {}
 
-export type RegisteredRouter = Register extends {
-  router: infer R extends AnySvelteRouter;
-}
-  ? R
-  : AnySvelteRouter;
+export type RegisteredRouter = ResolveRegister<Register, AnySvelteRouter>;

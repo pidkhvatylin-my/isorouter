@@ -133,3 +133,14 @@ export type NavTarget<T extends readonly RouteConfig<any>[]> =
   | Href<T>
   | `${Href<T>}?${string}`
   | `${Href<T>}#${string}`;
+
+/**
+ * Resolves a `Register` interface to its `router` type when augmented,
+ * or falls back to `Fallback` when the interface is empty.
+ * Used by framework adapters to implement the module-augmentation pattern.
+ */
+export type ResolveRegister<Reg, Fallback> = Reg extends {
+  router: infer R extends Fallback;
+}
+  ? R
+  : Fallback;
