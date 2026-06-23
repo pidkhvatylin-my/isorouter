@@ -10,7 +10,7 @@ import { FakeNavigation } from "@isorouter/test-utils";
 import { DashboardLayout, Home, Settings, routes } from "./fixtures";
 
 import type { RouteConfig } from "@isorouter/core";
-import type { ReactComponentType } from "../src/context";
+import type { ReactComponentType } from "../src/index";
 
 let nav: FakeNavigation;
 

@@ -2,13 +2,12 @@ import { useCallback, useSyncExternalStore } from "react";
 
 import { useRouterInstance } from "./context";
 
-import type { ReactComponentType, ReactRouter } from "./context";
+import type { ReactComponentType, RegisteredRouter } from "./types";
 import type { RouterSnapshot } from "@isorouter/core";
 
-/** Subscribe to the router snapshot (re-renders on navigation). */
 export function useRouterState(): RouterSnapshot<ReactComponentType> {
   const router = useRouterInstance();
-  // subscribe / getSnapshot are stable bound fields on the instance.
+
   return useSyncExternalStore(
     router.subscribe,
     router.getSnapshot,
@@ -26,15 +25,19 @@ export function useLocation(): URL {
   return useRouterState().url;
 }
 
-export function useRouter(): ReactRouter {
-  return useRouterInstance();
+export function useRouter(): RegisteredRouter {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return useRouterInstance() as unknown as RegisteredRouter;
 }
 
 export function useNavigate() {
-  const router = useRouterInstance();
+  const router = useRouter();
+
   return useCallback(
-    (to: string, opts?: { replace?: boolean; state?: unknown }) =>
-      router.navigate(to as never, opts),
+    (
+      to: Parameters<RegisteredRouter["navigate"]>[0],
+      opts?: { replace?: boolean; state?: unknown },
+    ) => router.navigate(to, opts),
     [router],
   );
 }

@@ -1,10 +1,11 @@
 import { useEffect, type ReactNode } from "react";
 
-import { DepthContext, RouterContext, type ReactRouter } from "./context";
+import { DepthContext, RouterContext } from "./context";
+import type { AnyReactRouter } from "./types";
 import { useRouterState } from "./hooks";
 
 export interface RouterProps {
-  router: ReactRouter;
+  router: AnyReactRouter;
   notFound?: ReactNode;
   error?: (err: unknown) => ReactNode;
   loading?: ReactNode;
@@ -13,6 +14,7 @@ export interface RouterProps {
 export function Router({ router, notFound, error, loading }: RouterProps) {
   useEffect(() => {
     router.start();
+
     return () => router.stop();
   }, [router]);
 
@@ -27,9 +29,14 @@ export function Router({ router, notFound, error, loading }: RouterProps) {
 
 function RouterView({ notFound, error, loading }: Omit<RouterProps, "router">) {
   const state = useRouterState();
+
   if (state.status === "error" && error) return <>{error(state.error)}</>;
+
   if (state.status === "not-found" && notFound) return <>{notFound}</>;
+
   const Root = state.components[0];
+
   if (Root) return <Root />;
+
   return <>{loading ?? null}</>;
 }

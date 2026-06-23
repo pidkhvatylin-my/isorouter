@@ -45,7 +45,7 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    files: ["src/context.ts"],
+    files: ["src/types.ts"],
     rules: {
       // `ComponentType<any>` / `Router<readonly any[], C>` is the intentional
       // "erase the component/route type" pattern shared with core's

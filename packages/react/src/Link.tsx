@@ -9,34 +9,37 @@ export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   exact?: boolean;
 }
 
-/**
- * Plain <a>. The Navigation API intercepts the click; modifier-clicks,
- * target=_blank and downloads are handled natively, so no extra logic needed.
- */
-export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
-  {
-    href,
-    className = "",
-    activeClassName = "active",
-    exact = false,
-    children,
-    ...rest
+export const Link = forwardRef<HTMLAnchorElement, LinkProps>(
+  (
+    {
+      href,
+      className = "",
+      activeClassName = "active",
+      exact = false,
+      children,
+      ...rest
+    },
+    ref,
+  ) => {
+    const router = useRouterInstance();
+
+    useRouterState(); // re-render on navigation to update active state
+
+    const active = router.isActive(href, { exact });
+    const classes = `${className} ${active ? activeClassName : ""}`.trim();
+
+    return (
+      <a
+        ref={ref}
+        href={href}
+        className={classes || undefined}
+        aria-current={active ? "page" : undefined}
+        {...rest}
+      >
+        {children}
+      </a>
+    );
   },
-  ref,
-) {
-  const router = useRouterInstance();
-  useRouterState(); // re-render on navigation to update active state
-  const active = router.isActive(href, { exact });
-  const cls = `${className} ${active ? activeClassName : ""}`.trim();
-  return (
-    <a
-      ref={ref}
-      href={href}
-      className={cls || undefined}
-      aria-current={active ? "page" : undefined}
-      {...rest}
-    >
-      {children}
-    </a>
-  );
-});
+);
+
+Link.displayName = "Link";

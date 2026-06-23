@@ -14,7 +14,7 @@ import { FakeNavigation } from "@isorouter/test-utils";
 import { routes } from "./fixtures";
 
 import type { ReactNode } from "react";
-import type { ReactRouter } from "../src/context";
+import type { AnyReactRouter } from "../src/index";
 
 let nav: FakeNavigation;
 
@@ -33,7 +33,7 @@ function flush(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-function wrapperFor(router: ReactRouter) {
+function wrapperFor(router: AnyReactRouter) {
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <RouterContext.Provider value={router}>{children}</RouterContext.Provider>
@@ -154,7 +154,10 @@ describe("useNavigate", () => {
     expect(result.current).toBe(first);
 
     act(() => {
-      result.current("/about", { replace: true, state: { from: "test" } });
+      result.current("/about" as never, {
+        replace: true,
+        state: { from: "test" },
+      });
     });
 
     expect(navigateSpy).toHaveBeenCalledWith("/about", {

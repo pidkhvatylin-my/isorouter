@@ -10,7 +10,7 @@ import {
   useParams,
 } from "../../src/index";
 
-import type { ReactComponentType } from "../../src/context";
+import type { ReactComponentType } from "../../src/index";
 import type { GuardContext, RouteConfig } from "@isorouter/core";
 
 function Home() {
