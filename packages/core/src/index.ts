@@ -16,6 +16,7 @@ export type {
   Href,
   NavTarget,
   NavigationKind,
+  ResolveRegister,
   RouteConfig,
   RouteMatch,
   RouteTemplate,

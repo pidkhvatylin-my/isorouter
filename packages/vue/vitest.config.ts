@@ -7,6 +7,10 @@ export default defineConfig({
       jsdom: { url: "http://localhost/" },
     },
     include: ["test/**/*.test.ts"],
+    typecheck: {
+      enabled: true,
+      include: ["test/types/**/*.test-d.ts"],
+    },
     coverage: { provider: "v8" },
   },
 });

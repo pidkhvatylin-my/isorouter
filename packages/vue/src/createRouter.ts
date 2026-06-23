@@ -1,7 +1,7 @@
 import { createCoreRouter } from "@isorouter/core";
 
-import type { VueComponentType } from "./context";
 import type { RouteConfig, RouterOptions } from "@isorouter/core";
+import type { VueComponentType } from "./types";
 
 export function createRouter<
   const T extends readonly RouteConfig<VueComponentType>[],

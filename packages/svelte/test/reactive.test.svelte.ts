@@ -1,11 +1,8 @@
 import { tick } from "svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  createRouter,
-  SvelteRouter,
-  type SvelteComponentType,
-} from "../src/reactive.svelte";
+import { createRouter, SvelteRouter } from "../src/reactive.svelte";
+import type { SvelteComponentType } from "../src/index";
 import { routes } from "./helpers/routes";
 
 import { FakeNavigation } from "@isorouter/test-utils";

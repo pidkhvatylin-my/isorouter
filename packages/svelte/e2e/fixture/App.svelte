@@ -3,7 +3,7 @@
   import Link from "../../src/Link.svelte";
   import Router from "../../src/Router.svelte";
 
-  import type { AnySvelteRouter } from "../../src/reactive.svelte";
+  import type { AnySvelteRouter } from "../../src/types";
 
   const { router }: { router: AnySvelteRouter } = $props();
 

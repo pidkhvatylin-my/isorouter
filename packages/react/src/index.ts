@@ -1,3 +1,14 @@
+export { lazy } from "@isorouter/core";
+export type {
+  BeforeLoad,
+  GuardContext,
+  Href,
+  NavTarget,
+  RouteConfig,
+  RouterOptions,
+  RouterSnapshot,
+} from "@isorouter/core";
+
 export { createRouter } from "./createRouter";
 export { Router, type RouterProps } from "./Router";
 export { Outlet } from "./Outlet";
@@ -9,13 +20,9 @@ export {
   useLocation,
   useNavigate,
 } from "./hooks";
-export { lazy } from "@isorouter/core";
 export type {
-  BeforeLoad,
-  GuardContext,
-  Href,
-  NavTarget,
-  RouteConfig,
-  RouterOptions,
-  RouterSnapshot,
-} from "@isorouter/core";
+  AnyReactRouter,
+  ReactComponentType,
+  Register,
+  RegisteredRouter,
+} from "./types";

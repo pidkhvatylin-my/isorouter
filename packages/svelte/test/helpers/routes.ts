@@ -5,7 +5,7 @@ import Home from "../fixtures/Home.svelte";
 import Overview from "../fixtures/Overview.svelte";
 import Settings from "../fixtures/Settings.svelte";
 
-import type { SvelteComponentType } from "../../src/reactive.svelte";
+import type { SvelteComponentType } from "../../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
 export const routes = [

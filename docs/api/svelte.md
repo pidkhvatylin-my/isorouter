@@ -21,9 +21,12 @@ npm install @isorouter/svelte
 
 ## Types
 
-`AnySvelteRouter`, `SvelteComponentType`, plus the core re-exports `BeforeLoad`,
-`GuardContext`, `Href`, `NavTarget`, `RouteConfig`, `RouterOptions`,
-`RouterSnapshot`.
+`AnySvelteRouter`, `SvelteComponentType`, `Register`, `RegisteredRouter`, plus
+the core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`,
+`RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+
+Augment `Register` to narrow `getRouter()` to the concrete router type — see
+[Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
 
 ## `<Router>` snippets
 
@@ -41,10 +44,12 @@ the `<a>`. See [Links & active state](../guide/links).
 
 ## `getRouter()`
 
-Returns the `SvelteRouter`. `router.current` is a getter — read it inside a
-`$derived`, `$effect` or the template to subscribe to commits; the subscription
-drops once nothing reads it. `router.navigate`, `router.back`, `router.forward`
-and `router.isActive` are available on the instance too.
+Returns the `RegisteredRouter` (resolves to the concrete `SvelteRouter<T>` when
+`Register` is augmented, or `AnySvelteRouter` otherwise). `router.current` is a
+getter — read it inside a `$derived`, `$effect` or the template to subscribe to
+commits; the subscription drops once nothing reads it. `router.navigate`,
+`router.back`, `router.forward` and `router.isActive` are available on the
+instance too.
 
 > Bridge primitive: Svelte 5's `createSubscriber` — the subscription is live
 > only while `current` is read in a reactive scope, and is auto-torn-down.

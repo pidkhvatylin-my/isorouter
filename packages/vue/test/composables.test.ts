@@ -15,7 +15,7 @@ import { routes } from "./helpers/routes";
 
 import { FakeNavigation } from "@isorouter/test-utils";
 
-import type { VueRouter } from "../src/context";
+import type { AnyVueRouter } from "../src/index";
 
 let nav: FakeNavigation;
 
@@ -32,7 +32,7 @@ afterEach(() => {
  * Mount a host component that provides `router` and run `setupFn` inside a
  * child component — a component can't `inject` what it `provide`s itself.
  */
-function mountWithRouter<T>(router: VueRouter, setupFn: () => T) {
+function mountWithRouter<T>(router: AnyVueRouter, setupFn: () => T) {
   let result!: T;
   const Child = defineComponent({
     setup() {

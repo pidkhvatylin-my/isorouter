@@ -10,7 +10,7 @@ import { routes } from "./helpers/routes";
 
 import { FakeNavigation } from "@isorouter/test-utils";
 
-import type { VueComponentType } from "../src/context";
+import type { VueComponentType } from "../src/index";
 import type { RouteConfig, Unsubscribe } from "@isorouter/core";
 import type { Mock } from "vitest";
 

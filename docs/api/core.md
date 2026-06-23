@@ -138,6 +138,22 @@ interface RouterSnapshot<C> {
 }
 ```
 
+### `ResolveRegister<Reg, Fallback>`
+
+```ts twoslash
+// @noErrors
+type ResolveRegister<Reg, Fallback> = Reg extends {
+  router: infer R extends Fallback;
+}
+  ? R
+  : Fallback;
+```
+
+Resolves to `Reg["router"]` when the `Register` interface has been augmented,
+or falls back to `Fallback` when it is empty. Used by all framework adapters to
+implement the `Register` / `RegisteredRouter` module-augmentation pattern. See
+[Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
+
 ### `GuardContext` & `BeforeLoad`
 
 ```ts twoslash
@@ -203,7 +219,8 @@ interface RouterOptions {
 `createCoreRouter`, `Router`, `matchRoutes`, `lazy`, `isLazy`, and the types
 `AnyRouter`, `Unsubscribe`, `LazyComponent`, `Awaitable`, `BeforeLoad`,
 `ExtractParams`, `GuardContext`, `Href`, `NavTarget`, `NavigationKind`,
-`RouteConfig`, `RouteMatch`, `RouteTemplate`, `RouterOptions`, `RouterSnapshot`.
+`ResolveRegister`, `RouteConfig`, `RouteMatch`, `RouteTemplate`, `RouterOptions`,
+`RouterSnapshot`.
 
 ## Other targets (TypeScript)
 

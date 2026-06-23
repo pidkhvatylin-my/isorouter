@@ -1,7 +1,7 @@
 import { Outlet } from "../src/Outlet";
 import { useParams } from "../src/hooks";
 
-import type { ReactComponentType } from "../src/context";
+import type { ReactComponentType } from "../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
 export function Home() {

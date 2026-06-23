@@ -127,6 +127,37 @@ template to subscribe to commits; the subscription is dropped once nothing reads
 it. `router.navigate`, `router.back`, `router.forward` and `router.isActive` are
 also available on the instance.
 
+## Module augmentation
+
+Augmenting the `Register` interface narrows `getRouter()` to the **concrete**
+router type everywhere in the project:
+
+```ts
+// main.ts
+import { createRouter } from "@isorouter/svelte";
+
+export const router = createRouter([
+  { path: "/", component: Home },
+  { path: "/about", component: About },
+] as const);
+
+declare module "@isorouter/svelte" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
+
+Place the `declare module` block in the same file as `createRouter`. TypeScript
+merges it globally — `getRouter()` in any component now returns the concrete
+`SvelteRouter<T>`, so `router.navigate("/about")` type-checks and invalid paths
+are rejected at compile time.
+
+Without the augmentation `getRouter()` returns `AnySvelteRouter`, which is the
+same behaviour as before.
+
+See [Type-safe navigation → Module augmentation](../guide/type-safe-navigation#module-augmentation).
+
 ## See also
 
 - [Type-safe navigation](../guide/type-safe-navigation)

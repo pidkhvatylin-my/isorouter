@@ -15,7 +15,7 @@ npm install @isorouter/vue
 | `RouterView`      | component   | Root component — calls `start`/`stop`, renders matched component or `loading`/`notFound`/`error` slots. |
 | `Outlet`          | component   | Renders the next component in the matched chain; nothing if no child. |
 | `Link`            | component   | A plain `<a>` intercepted by the Navigation API.                      |
-| `useRouter`       | composable  | The `Router` instance.                                                |
+| `useRouter`       | composable  | The `RegisteredRouter` instance.                                      |
 | `useRouterState`  | composable  | `ShallowRef<RouterSnapshot>`; fresh reference on every commit.        |
 | `useParams`       | composable  | `ComputedRef<Record<string, string>>`.                               |
 | `useLocation`     | composable  | `ComputedRef<URL>`.                                                   |
@@ -24,8 +24,12 @@ npm install @isorouter/vue
 
 ## Types
 
-Core re-exports: `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`,
-`RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+`AnyVueRouter`, `VueComponentType`, `Register`, `RegisteredRouter`, plus the
+core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`, `RouteConfig`,
+`RouterOptions`, `RouterSnapshot`.
+
+Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
+router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
 
 ## `<RouterView>` slots
 

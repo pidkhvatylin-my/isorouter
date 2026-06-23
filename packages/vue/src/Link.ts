@@ -3,10 +3,6 @@ import { computed, defineComponent, h } from "vue";
 import { injectRouter } from "./context";
 import { useRouterState } from "./composables";
 
-/**
- * Plain <a>. The Navigation API intercepts the click; modifier-clicks,
- * target=_blank and downloads are handled natively.
- */
 export const Link = defineComponent({
   name: "RouterLink",
   props: {
@@ -21,6 +17,7 @@ export const Link = defineComponent({
       void state.value; // track navigation
       return router.isActive(props.href, { exact: props.exact });
     });
+
     return () =>
       h(
         "a",

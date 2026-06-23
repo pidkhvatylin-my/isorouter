@@ -2,7 +2,7 @@ import { markRaw } from "vue";
 
 import { createRouter } from "../../src/createRouter";
 
-import type { VueComponentType } from "../../src/context";
+import type { VueComponentType } from "../../src/index";
 import type { RouteConfig, RouterOptions } from "@isorouter/core";
 
 /**

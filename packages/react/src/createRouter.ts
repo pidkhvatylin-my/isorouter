@@ -1,6 +1,6 @@
 import { createCoreRouter } from "@isorouter/core";
 
-import type { ReactComponentType } from "./context";
+import type { ReactComponentType } from "./types";
 import type { RouteConfig, RouterOptions } from "@isorouter/core";
 
 export function createRouter<

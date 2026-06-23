@@ -6,6 +6,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["test/**/*.test.{ts,svelte.ts}"],
+    typecheck: {
+      enabled: true,
+      include: ["test/types/**/*.test-d.ts"],
+      tsconfig: "./tsconfig.typecheck.json",
+    },
     setupFiles: ["./test/setup.ts"],
     coverage: {
       provider: "v8",
