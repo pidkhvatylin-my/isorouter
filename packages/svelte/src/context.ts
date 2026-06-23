@@ -1,6 +1,6 @@
 import { getContext, setContext } from "svelte";
 
-import type { AnySvelteRouter } from "./reactive.svelte";
+import type { AnySvelteRouter, RegisteredRouter } from "./types";
 
 const KEY = Symbol("isorouter");
 
@@ -17,7 +17,7 @@ export function getOutletContext(): OutletContext {
   return getContext(KEY);
 }
 
-/** Read the router instance from context (use inside a route component). */
-export function getRouter(): AnySvelteRouter {
-  return getOutletContext().router;
+export function getRouter(): RegisteredRouter {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  return getOutletContext().router as unknown as RegisteredRouter;
 }

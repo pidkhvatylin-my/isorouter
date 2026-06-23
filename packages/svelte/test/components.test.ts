@@ -13,7 +13,7 @@ import { routes } from "./helpers/routes";
 
 import { FakeNavigation } from "@isorouter/test-utils";
 
-import type { SvelteComponentType } from "../src/reactive.svelte";
+import type { SvelteComponentType } from "../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
 let nav: FakeNavigation;

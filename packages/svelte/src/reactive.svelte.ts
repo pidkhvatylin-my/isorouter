@@ -2,7 +2,6 @@ import { createSubscriber } from "svelte/reactivity";
 
 import { Router } from "@isorouter/core";
 
-import type { Component } from "svelte";
 import type {
   NavTarget,
   RouteConfig,
@@ -10,7 +9,7 @@ import type {
   RouterSnapshot,
 } from "@isorouter/core";
 
-export type SvelteComponentType = Component<any>;
+import type { SvelteComponentType } from "./types";
 
 /**
  * Svelte 5 wrapper. Bridges the core's PubSub snapshot into runes via
@@ -61,7 +60,3 @@ export function createRouter<
 >(routes: T, options?: RouterOptions): SvelteRouter<T> {
   return new SvelteRouter(routes, options);
 }
-
-export type AnySvelteRouter = SvelteRouter<
-  readonly RouteConfig<SvelteComponentType>[]
->;

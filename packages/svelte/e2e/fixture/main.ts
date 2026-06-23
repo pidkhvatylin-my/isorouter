@@ -14,7 +14,7 @@ import Settings from "./pages/Settings.svelte";
 import Slow from "./pages/Slow.svelte";
 
 import type { GuardContext, RouteConfig } from "../../src/index";
-import type { SvelteComponentType } from "../../src/reactive.svelte";
+import type { SvelteComponentType } from "../../src/index";
 
 declare global {
   interface Window {

@@ -4,7 +4,7 @@
   import { setOutletContext } from "./context";
 
   import type { Snippet } from "svelte";
-  import type { AnySvelteRouter } from "./reactive.svelte";
+  import type { AnySvelteRouter } from "./types";
 
   let {
     router,
