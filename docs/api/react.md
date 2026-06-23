@@ -15,7 +15,7 @@ npm install @isorouter/react
 | `Router`          | component | Root component — calls `start`/`stop`, renders matched component or `loading`/`notFound`/`error`. |
 | `Outlet`          | component | Renders the next component in the matched chain; nothing if no child. |
 | `Link`            | component | A plain `<a>` intercepted by the Navigation API; forwards `ref`.      |
-| `useRouter`       | hook      | The `Router` instance.                                                |
+| `useRouter`       | hook      | The `RegisteredRouter` instance.                                      |
 | `useRouterState`  | hook      | Current `RouterSnapshot`, re-rendering on every commit.               |
 | `useParams`       | hook      | `snapshot.params`, typed as `P`.                                      |
 | `useLocation`     | hook      | `snapshot.url`.                                                       |
@@ -24,9 +24,12 @@ npm install @isorouter/react
 
 ## Types
 
-`RouterProps`, `LinkProps`, plus the core re-exports `BeforeLoad`,
-`GuardContext`, `Href`, `NavTarget`, `RouteConfig`, `RouterOptions`,
-`RouterSnapshot`.
+`RouterProps`, `LinkProps`, `AnyReactRouter`, `ReactComponentType`, `Register`,
+`RegisteredRouter`, plus the core re-exports `BeforeLoad`, `GuardContext`,
+`Href`, `NavTarget`, `RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+
+Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
+router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
 
 ## `<Router>` props
 

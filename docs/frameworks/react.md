@@ -111,6 +111,37 @@ function User() {
 `useNavigate()` is referentially stable, so it's safe in `useEffect` dependency
 arrays and `useCallback` bodies without re-subscribing.
 
+## Module augmentation
+
+Augmenting the `Register` interface narrows `useRouter()` and `useNavigate()`
+to the **concrete** router type everywhere in the project — including across
+package boundaries:
+
+```ts
+// router.ts
+import { createRouter } from "@isorouter/react";
+
+export const router = createRouter([
+  { path: "/", component: Home },
+  { path: "/about", component: About },
+] as const);
+
+declare module "@isorouter/react" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
+
+Place the `declare module` block in the same file as `createRouter`. TypeScript
+merges it globally — `useNavigate()` in any component now accepts only
+`"/"` or `"/about"`, and invalid paths become compile-time errors.
+
+Without the augmentation `useRouter()` returns `AnyReactRouter` and
+`useNavigate()` accepts any string, which is the same behaviour as before.
+
+See [Type-safe navigation → Module augmentation](../guide/type-safe-navigation#module-augmentation).
+
 ## See also
 
 - [Type-safe navigation](../guide/type-safe-navigation)

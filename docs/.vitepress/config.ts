@@ -53,13 +53,13 @@ export default defineConfig({
       {
         text: "Frameworks",
         items: [
-          { text: "Svelte 5", link: "/frameworks/svelte" },
+          { text: "Svelte", link: "/frameworks/svelte" },
           { text: "React", link: "/frameworks/react" },
-          { text: "Vue 3", link: "/frameworks/vue" },
+          { text: "Vue", link: "/frameworks/vue" },
         ],
       },
       {
-        text: "v1.1.1",
+        text: "v1",
         items: [
           {
             text: "Changelog",

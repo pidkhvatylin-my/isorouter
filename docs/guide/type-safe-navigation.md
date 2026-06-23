@@ -80,6 +80,46 @@ navigate("/concerts/kyiv");
 
 :::
 
+## Module augmentation
+
+By default `useRouter()` / `useNavigate()` / `getRouter()` return the widened
+`AnyXxxRouter` type, which is fine for runtime but loses the precise path union.
+Augmenting the `Register` interface narrows every helper to the **concrete**
+router type — across package boundaries, with no extra imports:
+
+```ts twoslash
+// @errors: 2345
+import { createRouter } from "@isorouter/react";
+import type { ComponentType } from "react";
+
+const router = createRouter([
+  { path: "/", component: null! as ComponentType },
+  { path: "/about", component: null! as ComponentType },
+] as const);
+
+declare module "@isorouter/react" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+import type { RegisteredRouter } from "@isorouter/react";
+
+type To = Parameters<RegisteredRouter["navigate"]>[0];
+//   ^?
+
+router.navigate("/about"); // ok
+router.navigate("/nonexistent"); // type error
+```
+
+Declare the augmentation once in the file where `router` lives (e.g.
+`router.ts`). TypeScript merges it globally — every call to `useNavigate()`,
+`useRouter()`, or `getRouter()` in the project picks up the narrowed type
+automatically.
+
+The same pattern works identically for `@isorouter/vue` and
+`@isorouter/svelte` — swap the module name.
+
 ## Navigation options
 
 `navigate` takes an optional second argument:

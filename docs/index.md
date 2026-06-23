@@ -6,7 +6,7 @@ hero:
   # The "isorouter" name is rendered as the two-tone <Wordmark> via the
   # home-hero-info-before slot (see .vitepress/theme/index.ts).
   text: "One router. Any framework. The platform underneath."
-  tagline: A lightweight SPA router built on the browser Navigation API — a zero-dependency TypeScript core with thin Svelte 5, React and Vue 3 adapters.
+  tagline: A lightweight SPA router built on the browser Navigation API — a zero-dependency TypeScript core with thin Svelte, React and Vue adapters.
   image:
     light: /logo-light.svg
     dark: /logo.svg
@@ -34,7 +34,7 @@ features:
     details: The core is ~4 KB minified (1.8 KB gzipped) with zero runtime dependencies and sideEffects&nbsp;false for full tree-shaking. Each adapter adds only ~0.5 KB gzipped on top.
   - icon: 🔒
     title: Type-safe navigation
-    details: Declare routes "as const" and navigate() only accepts known paths at compile time — "/users/:id" becomes `/users/${string}`, with optional ?query / #hash.
+    details: Declare routes "as const" and navigate() only accepts known paths at compile time — "/users/:id" becomes `/users/${string}`, with optional ?query/#hash.
   - icon: ⚛️
     title: Svelte 5, React & Vue 3
     details: One immutable-snapshot external store, three native bridges — createSubscriber, useSyncExternalStore and shallowRef. Correct, tear-free updates everywhere.
