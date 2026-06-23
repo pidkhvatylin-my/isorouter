@@ -1,5 +1,18 @@
 # @isorouter/core
 
+## 1.2.0
+
+### Patch Changes
+
+- [#21](https://github.com/pidkhvatylin-my/isorouter/pull/21) [`f783dd0`](https://github.com/pidkhvatylin-my/isorouter/commit/f783dd0ba04eed3413f1d1f71812a16c9af76902) Thanks [@pidkhvatylin-my](https://github.com/pidkhvatylin-my)! - Export `ResolveRegister<Reg, Fallback>` utility type.
+
+  This is the conditional type that backs the `Register`/`RegisteredRouter` pattern in all framework adapters. Exporting it from core lets adapters share the same implementation instead of each defining their own copy.
+
+  ```ts
+  // Used internally by adapters as:
+  export type RegisteredRouter = ResolveRegister<Register, AnyReactRouter>;
+  ```
+
 ## 1.1.2
 
 ### Patch Changes
