@@ -10,7 +10,7 @@ import {
 } from "../../src/index";
 
 import type { GuardContext, RouteConfig } from "../../src/index";
-import type { VueComponentType } from "../../src/context";
+import type { VueComponentType } from "../../src/index";
 
 declare global {
   interface Window {

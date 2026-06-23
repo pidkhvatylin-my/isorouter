@@ -9,13 +9,13 @@ import {
   type SlotsType,
 } from "vue";
 
-import { DepthKey, RouterKey, type VueRouter } from "./context";
+import { DepthKey, RouterKey } from "./context";
+import type { AnyVueRouter } from "./types";
 
-/** Root component. Mount once near the app root and pass the router instance. */
 export const RouterView = defineComponent({
   name: "RouterView",
   props: {
-    router: { type: Object as PropType<VueRouter>, required: true },
+    router: { type: Object as PropType<AnyVueRouter>, required: true },
   },
   slots: Object as SlotsType<{
     notFound?: () => unknown;
@@ -28,23 +28,28 @@ export const RouterView = defineComponent({
 
     // Subscribe locally — a component cannot inject what it provides itself.
     const state = shallowRef(props.router.getSnapshot());
-    const unsub = props.router.subscribe((s) => {
-      state.value = s;
+    const unsubscribe = props.router.subscribe((routerSnapshot) => {
+      state.value = routerSnapshot;
     });
 
     onMounted(() => props.router.start());
     onUnmounted(() => {
       props.router.stop();
-      unsub();
+      unsubscribe();
     });
 
     return () => {
       const s = state.value;
+
       if (s.status === "error" && slots.error)
         return slots.error({ error: s.error });
+
       if (s.status === "not-found" && slots.notFound) return slots.notFound();
+
       const Root = s.components[0];
+
       if (Root) return h(Root);
+
       return slots.loading ? slots.loading() : null;
     };
   },

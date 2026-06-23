@@ -7,7 +7,7 @@ import {
   Settings,
 } from "./components";
 
-import type { VueComponentType } from "../../src/context";
+import type { VueComponentType } from "../../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
 export const routes = [
