@@ -15,6 +15,9 @@ immutable-snapshot external store with Svelte 5's `createSubscriber`: reading
 commits, and the subscription is torn down automatically once nothing reads it
 anymore — no manual `$effect`, no leaks.
 
+**[Full documentation →](https://pidkhvatylin-my.github.io/isorouter/frameworks/svelte)**  
+**[Live demo on StackBlitz →](https://stackblitz.com/github/pidkhvatylin-my/isorouter/tree/master/demos/svelte)**
+
 ## Install
 
 ```sh
@@ -34,11 +37,10 @@ npm install @isorouter/svelte
 ## Quick start
 
 ```ts
-// main.ts
-import { mount } from "svelte";
-import { createRouter } from "@isorouter/svelte";
+// router.ts
+import { createRouter, lazy } from "@isorouter/svelte";
 
-import App from "./App.svelte";
+import AppLayout from "./AppLayout.svelte";
 import Home from "./Home.svelte";
 import About from "./About.svelte";
 import DashboardLayout from "./DashboardLayout.svelte";
@@ -46,29 +48,44 @@ import Overview from "./Overview.svelte";
 import Settings from "./Settings.svelte";
 
 export const router = createRouter([
-  { path: "/", component: Home },
-  { path: "about", component: About },
   {
-    path: "dashboard",
-    component: DashboardLayout,
+    path: "/",
+    component: AppLayout,
     children: [
-      { index: true, component: Overview },
-      { path: "settings", component: Settings },
+      { index: true, title: "Home", component: Home },
+      { path: "about", title: "About", component: About },
+      {
+        path: "dashboard",
+        component: DashboardLayout,
+        children: [
+          { index: true, component: Overview },
+          { path: "settings", component: Settings },
+        ],
+      },
     ],
   },
-] as const);
+] as const); // `as const` is required for type-safe navigation
 
-mount(App, { target: document.getElementById("app")!, props: { router } });
+declare module "@isorouter/svelte" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
+
+```ts
+// main.ts
+import { mount } from "svelte";
+import App from "./App.svelte";
+
+mount(App, { target: document.getElementById("app")! });
 ```
 
 ```svelte
 <!-- App.svelte -->
 <script lang="ts">
   import { Router } from "@isorouter/svelte";
-
-  import type { AnySvelteRouter } from "@isorouter/svelte";
-
-  let { router }: { router: AnySvelteRouter } = $props();
+  import { router } from "./router";
 </script>
 
 <Router {router}>
@@ -111,13 +128,16 @@ component type fixed to Svelte's `Component`. `<Router>` calls
 - `loading` — rendered whenever there's no matched root component yet (e.g.
   before the first commit) and neither `error` nor `notFound` applies.
 
+Snippet priority: `error` > `notFound` > matched component > `loading`.
+
 Otherwise renders the root matched component, `router.current.components[0]`.
 
 ### `<Outlet>`
 
 Renders the next component in the matched chain at the current nesting depth.
 Used inside a layout component to render its matched child route; renders
-nothing when there is no matching child.
+nothing when there is no matching child. The layout instance **stays mounted**
+across child navigations.
 
 ### `<Link>`
 
@@ -133,13 +153,11 @@ forwarded to the `<a>`.
 - `class` — merged with `activeClass`.
 - `activeClass` — appended to `class` when `router.isActive(href, { exact })`
   (default `"active"`).
-- `exact` — passed through to `isActive`; when set, only an exact match is
-  considered active.
+- `exact` — when set, only an exact URL match is considered active (without it,
+  a parent link stays active on all child routes).
 
-When active, also sets `aria-current="page"`. The default snippet content is
-rendered as the link's children.
-
-Must be used within `<Router>` (or `<Outlet>`).
+When active, also sets `aria-current="page"`. Must be used within `<Router>`
+(or `<Outlet>`).
 
 ## `getRouter()`
 
@@ -159,10 +177,33 @@ Reads the `SvelteRouter` instance from context. Must be used within `<Router>`
 once nothing reads it. `router.navigate`, `router.back`, `router.forward` and
 `router.isActive` are also available on the instance.
 
+## Route `title`
+
+Routes accept an optional `title` — a string or a function:
+
+```ts
+{ path: "about", title: "About", component: About }
+
+// Dynamic — receives GuardContext with params, url, signal
+{ path: "users/:id", title: (ctx) => `User #${ctx.params.id}`, component: User }
+```
+
 ## Type-safe navigation
 
-Declare routes `as const` and `router.navigate` only accepts known paths — see
-[`@isorouter/core`'s Type-safe navigation](https://github.com/pidkhvatylin-my/isorouter/tree/master/packages/core#type-safe-navigation).
+Declare routes `as const` and augment `Register` in the same file — then
+`router.navigate` only accepts known paths and `getRouter()` returns the
+concrete type everywhere:
+
+```ts
+// router.ts
+export const router = createRouter([...] as const);
+
+declare module "@isorouter/svelte" {
+  interface Register { router: typeof router; }
+}
+```
+
+See [`@isorouter/core`'s Type-safe navigation](https://github.com/pidkhvatylin-my/isorouter/tree/master/packages/core#type-safe-navigation).
 
 ## License
 

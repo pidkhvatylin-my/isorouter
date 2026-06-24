@@ -1,6 +1,8 @@
 <script lang="ts">
   import { auth } from "../auth.svelte";
 
+  // Reaching this page means beforeLoad in router.ts returned undefined (allowed).
+  // Log out below to see the guard redirect you back to "/" on next visit.
   const handleLogOutButtonClick = () => {
     auth.loggedIn = false;
   };

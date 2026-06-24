@@ -9,20 +9,26 @@
 </script>
 
 <nav>
+  <!-- `exact` — active only on an exact URL match, not on child routes -->
   <Link href="/" exact>Home</Link>
   <Link href="/about" exact>About</Link>
   <Link href="/users/42">User #42</Link>
+  <!-- `exact` — prevents /dashboard/settings from also highlighting this link -->
   <Link href="/dashboard" exact>Dashboard</Link>
   <Link href="/dashboard/settings">Settings</Link>
+  <!-- No route matches /nowhere → triggers the {#snippet notFound} in App.svelte -->
   <Link href="/nowhere">404</Link>
+  <!-- beforeLoad throws → triggers the {#snippet error} in App.svelte -->
   <Link href="/error-demo">Error</Link>
 
+  <!-- Toggles auth.loggedIn; the beforeLoad guard on /dashboard/settings reads it -->
   <button onclick={handleAuthButtonClick}>
     {auth.loggedIn ? "Log out" : "Log in"}
   </button>
 </nav>
 
 <main>
+  <!-- Renders the matched child route (Home, About, User, DashboardLayout…) -->
   <Outlet />
 </main>
 

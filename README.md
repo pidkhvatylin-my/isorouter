@@ -26,6 +26,8 @@ A lightweight, **framework-agnostic SPA router built on the browser
 
 📖 **[Documentation](https://pidkhvatylin-my.github.io/isorouter/)** — guide, framework adapters and full API reference.
 
+🎮 **[Svelte demo on StackBlitz](https://stackblitz.com/github/pidkhvatylin-my/isorouter/tree/master/demos/svelte)** — annotated sandbox with guards, lazy loading, nested layouts and type-safe navigation.
+
 The interception, matching, guards, lazy-loading and async-commit state machine
 live in a pure-TypeScript core with **zero framework dependencies**. Thin
 adapters bind that core into Svelte 5, React and Vue 3.
@@ -88,11 +90,23 @@ router.start();
 
 ### Svelte 5
 
+```ts
+// router.ts
+import { createRouter } from "@isorouter/svelte";
+import Home from "./Home.svelte";
+
+export const router = createRouter([{ path: "/", component: Home }] as const);
+
+declare module "@isorouter/svelte" {
+  interface Register { router: typeof router; }
+}
+```
+
 ```svelte
+<!-- App.svelte -->
 <script lang="ts">
-  import { createRouter, Router } from "@isorouter/svelte";
-  import Home from "./Home.svelte";
-  const router = createRouter([{ path: "/", component: Home }] as const);
+  import { Router } from "@isorouter/svelte";
+  import { router } from "./router";
 </script>
 
 <Router {router}>

@@ -9,6 +9,11 @@
   <Link href="/dashboard/settings">Settings</Link>
 </nav>
 
+<!--
+  Nested <Outlet>: renders Overview or Settings depending on the child URL.
+  DashboardLayout itself stays mounted when switching between children —
+  only the Outlet content swaps (scroll, focus and local state are preserved).
+-->
 <Outlet />
 
 <style>
