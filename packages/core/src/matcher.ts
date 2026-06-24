@@ -26,7 +26,7 @@ const SPLAT = "*";
 const SEGMENT_SCORE = {
   static: 10,
   param: 4,
-  splat: 1,
+  splat: 0,
 } as const;
 
 /**
