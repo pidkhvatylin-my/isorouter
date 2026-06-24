@@ -124,13 +124,26 @@ defeat the compile-time `Href`/`NavTarget` typing, which is a core feature.
 
 ### How do I add a 404 / catch-all page?
 
-Declare a `*` route. At the root it catches anything unmatched; as a child it
-catches anything unmatched **within that subtree** (rendering inside the
-parent's layout):
+You have two options — pick whichever fits your app.
+
+**Global 404 — the `notFound` handler.** When nothing matches, the snapshot
+reports `status: "not-found"`. Render whatever you like via the adapter's
+`notFound` handler (Svelte snippet, React prop, Vue slot) — no layout wraps it:
+
+```svelte
+<Router {router}>
+  {#snippet notFound()}
+    <h2>404 — not found</h2>
+  {/snippet}
+</Router>
+```
+
+**Nested 404 — a `*` route.** Inside a layout's `children`, a `*` catches
+anything unmatched **within that subtree** and renders inside the parent's
+layout (status stays `"idle"`):
 
 ```ts
 [
-  { path: "/", component: Home },
   {
     path: "dashboard",
     component: DashboardLayout,
@@ -139,12 +152,12 @@ parent's layout):
       { path: "*", component: DashboardNotFound }, // 404 inside the dashboard
     ],
   },
-  { path: "*", component: NotFound }, // global 404
 ]
 ```
 
-If nothing matches and you declared no `*` route, the snapshot reports
-`status: "not-found"` and renders nothing.
+A root-level `*` route works as a global catch-all too, if you prefer it — keep
+it last so your real routes still win. Use one or the other, not both: a root
+`*` matches every URL, so the `notFound` handler never fires.
 
 ### What happens to encoded slashes (`%2F`) in a param?
 

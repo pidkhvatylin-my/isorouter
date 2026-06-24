@@ -92,6 +92,36 @@ describe("matchRoutes", () => {
       ];
       expect(matchRoutes(routes, "/")?.params).toEqual({ "*": "" });
     });
+
+    it("does not match the root '/' route when a more specific path: '/' route is declared first", () => {
+      const routes: RouteConfig<string>[] = [
+        { path: "/", component: "home" },
+        { path: "*", component: "catchall" },
+      ];
+      expect(matchRoutes(routes, "/")?.chain[0]?.component).toBe("home");
+      expect(matchRoutes(routes, "/missing")?.chain[0]?.component).toBe(
+        "catchall",
+      );
+    });
+
+    it("catches unmatched paths inside a nested route subtree", () => {
+      const routes: RouteConfig<string>[] = [
+        {
+          path: "dashboard",
+          component: "layout",
+          children: [
+            { path: "settings", component: "settings" },
+            { path: "*", component: "not-found" },
+          ],
+        },
+      ];
+      expect(
+        matchRoutes(routes, "/dashboard/settings")?.chain.at(-1)?.component,
+      ).toBe("settings");
+      expect(
+        matchRoutes(routes, "/dashboard/unknown")?.chain.at(-1)?.component,
+      ).toBe("not-found");
+    });
   });
 
   describe("index routes", () => {
