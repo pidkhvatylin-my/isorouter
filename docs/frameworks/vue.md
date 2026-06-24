@@ -10,46 +10,87 @@ already immutable, so shallow-ref replacement is exactly right — no deep proxy
 npm install @isorouter/vue
 ```
 
+::: tip Live demo
+A full working demo with guards, lazy loading, nested layouts and type-safe
+navigation is available on
+[StackBlitz](https://stackblitz.com/github/pidkhvatylin-my/isorouter/tree/master/demos/vue)
+— every key concept is annotated inline.
+:::
+
 ## Quick start
 
-```ts
-import { createApp, defineComponent, h } from "vue";
-import { createRouter, RouterView, Outlet } from "@isorouter/vue";
+Create the router in a dedicated file and import it wherever it's needed:
 
-const router = createRouter([
-  { path: "/", component: Home },
-  { path: "about", component: About },
+```ts
+// router.ts
+import { createRouter } from "@isorouter/vue";
+import AppLayout from "./AppLayout.vue";
+import DashboardLayout from "./DashboardLayout.vue";
+import Home from "./Home.vue";
+import Overview from "./Overview.vue";
+
+export const router = createRouter([
   {
-    path: "dashboard",
-    component: DashboardLayout,
+    path: "/",
+    component: AppLayout,
     children: [
-      { index: true, component: Overview },
-      { path: "settings", component: Settings },
+      { index: true, component: Home },
+      {
+        path: "dashboard",
+        component: DashboardLayout,
+        children: [{ index: true, component: Overview }],
+      },
     ],
   },
-] as const);
+] as const); // `as const` is required for type-safe navigation
 
-const DashboardLayout = defineComponent({
-  render: () => h("div", [h("h1", "Dashboard"), h(Outlet)]),
-});
+// Module augmentation — see below
+declare module "@isorouter/vue" {
+  interface Register {
+    router: typeof router;
+  }
+}
+```
 
-const App = defineComponent({
-  render: () =>
-    h(RouterView, { router }, { notFound: () => h("p", "Not found") }),
-});
+```ts
+// main.ts
+import { createApp } from "vue";
+import App from "./App.vue";
 
 createApp(App).mount("#app");
+```
+
+```vue
+<!-- App.vue -->
+<script setup lang="ts">
+import { RouterView } from "@isorouter/vue";
+import { router } from "./router";
+</script>
+
+<template>
+  <RouterView :router="router">
+    <template #notFound><p>Not found</p></template>
+  </RouterView>
+</template>
+```
+
+```vue
+<!-- DashboardLayout.vue -->
+<script setup lang="ts">
+import { Outlet } from "@isorouter/vue";
+</script>
+
+<template>
+  <div>
+    <h1>Dashboard</h1>
+    <Outlet />
+  </div>
+</template>
 ```
 
 `createRouter` is `createCoreRouter` with the component type fixed to Vue's
 `Component`. `<RouterView>` calls `router.start()` on mount and `router.stop()`
 on unmount.
-
-::: tip SFC templates
-The examples here use the render-function form so they're framework-portable,
-but everything works identically in `<template>` SFCs:
-`<RouterView :router="router">`, `<Outlet />`, `<Link href="/about">`.
-:::
 
 ## Components
 
@@ -58,20 +99,23 @@ but everything works identically in `<template>` SFCs:
 Root component. Mount once near the app root and pass the router via the
 `router` prop, with optional named slots:
 
-```ts
-h(
-  RouterView,
-  { router },
-  {
-    loading: () => h(Spinner),
-    notFound: () => h(NotFound),
-    error: ({ error }) => h(ErrorPage, { error }),
-  },
-);
+```vue
+<script setup lang="ts">
+import { RouterView } from "@isorouter/vue";
+import { router } from "./router";
+</script>
+
+<template>
+  <RouterView :router="router">
+    <template #loading><Spinner /></template>
+    <template #notFound><NotFound /></template>
+    <template #error="{ error }"><ErrorPage :error="error" /></template>
+  </RouterView>
+</template>
 ```
 
 - `notFound` — rendered when `snapshot.status === "not-found"`.
-- `error` — called with `{ error: snapshot.error }` when status is `"error"`.
+- `error` — receives `{ error: snapshot.error }` when status is `"error"`.
 - `loading` — when there's no matched root component yet (e.g. before the first
   commit) and neither `error` nor `notFound` applies.
 
@@ -80,14 +124,33 @@ Otherwise renders the root matched component, `snapshot.components[0]`.
 ### `<Outlet>`
 
 Renders the next component in the matched chain at the current nesting depth;
-renders nothing when there's no matching child. Use it inside a layout.
+renders nothing when there's no matching child. Use it inside a layout:
+
+```vue
+<!-- DashboardLayout.vue -->
+<script setup lang="ts">
+import { Outlet } from "@isorouter/vue";
+</script>
+
+<template>
+  <h1>Dashboard</h1>
+  <Outlet />
+</template>
+```
+
+The layout component **stays mounted** across child navigations — only the
+`<Outlet>` content swaps. See [Nested layouts](../guide/nested-layouts).
 
 ### `<Link>`
 
-```ts
-h(Link, { href: "/dashboard", activeClass: "active", exact: true }, () =>
-  "Dashboard",
-);
+```vue
+<script setup lang="ts">
+import { Link } from "@isorouter/vue";
+</script>
+
+<template>
+  <Link href="/dashboard" activeClass="active" exact>Dashboard</Link>
+</template>
 ```
 
 A plain `<a>` intercepted by the Navigation API. `activeClass` is applied as the
@@ -108,6 +171,21 @@ provided there).
 | `useParams()`        | a `ComputedRef<Record<string, string>>` of the current params.        |
 | `useLocation()`      | a `ComputedRef<URL>` of the current location.                          |
 | `useNavigate()`      | `(to, opts?) => void` delegating to `router.navigate`.                 |
+
+```vue
+<script setup lang="ts">
+import { useParams, useNavigate } from "@isorouter/vue";
+
+// useParams() returns ComputedRef<Record<string, string>>;
+// Vue auto-unwraps refs in templates, so params.id works directly.
+const params = useParams();
+const navigate = useNavigate();
+</script>
+
+<template>
+  <button @click="navigate('/')">User {{ params.id }} — go home</button>
+</template>
+```
 
 `useRouterState()`'s subscription is torn down automatically via
 `onScopeDispose`.
