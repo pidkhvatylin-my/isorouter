@@ -1,6 +1,6 @@
 {
   "name": "@isorouter/svelte",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Svelte 5 adapter for @isorouter/core.",
   "license": "MIT",
   "author": "Mykhailo Pidkhvatylin <michel.podkhvatilin@gmail.com>",
@@ -53,7 +53,7 @@
     "svelte": "^5.7.0"
   },
   "dependencies": {
-    "@isorouter/core": "^1.2.0"
+    "@isorouter/core": "^1.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
