@@ -1,0 +1,145 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  color: #1a1a2e;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+pre {
+  background: #f0f0f0;
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+code {
+  background: #f0f0f0;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+/* Used by Router's notFound / error / loading props */
+.state-page {
+  padding: 2rem;
+}
+
+/* AppLayout */
+nav.app-nav {
+  background: #1a1a2e;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+nav.app-nav a {
+  color: #c8c8e8;
+  text-decoration: none;
+  padding: 0.3rem 0.65rem;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+nav.app-nav a:hover {
+  background: #2e2e50;
+}
+
+nav.app-nav a.active {
+  background: #4a4aaa;
+  color: #fff;
+}
+
+nav.app-nav button {
+  margin-left: auto;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid #4a4aaa;
+  background: transparent;
+  color: #c8c8e8;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+nav.app-nav button:hover {
+  background: #4a4aaa;
+  color: #fff;
+}
+
+main.app-main {
+  padding: 2rem;
+}
+
+/* DashboardLayout sub-nav */
+nav.sub-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e8;
+}
+
+nav.sub-nav a {
+  color: #4a4aaa;
+  text-decoration: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+nav.sub-nav a.active {
+  background: #4a4aaa;
+  color: #fff;
+}
+
+/* Home programmatic nav buttons */
+.nav-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.nav-buttons button {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #4a4aaa;
+  background: transparent;
+  color: #4a4aaa;
+  border-radius: 5px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  cursor: pointer;
+}
+
+.nav-buttons button:hover {
+  background: #4a4aaa;
+  color: #fff;
+}
+
+/* Settings logout button */
+.logout-btn {
+  margin-top: 0.5rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid #cc3333;
+  background: transparent;
+  color: #cc3333;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #cc3333;
+  color: #fff;
+}
