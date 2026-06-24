@@ -99,7 +99,9 @@ describe("matchRoutes", () => {
         { path: "*", component: "catchall" },
       ];
       expect(matchRoutes(routes, "/")?.chain[0]?.component).toBe("home");
-      expect(matchRoutes(routes, "/missing")?.chain[0]?.component).toBe("catchall");
+      expect(matchRoutes(routes, "/missing")?.chain[0]?.component).toBe(
+        "catchall",
+      );
     });
 
     it("catches unmatched paths inside a nested route subtree", () => {
@@ -113,8 +115,12 @@ describe("matchRoutes", () => {
           ],
         },
       ];
-      expect(matchRoutes(routes, "/dashboard/settings")?.chain.at(-1)?.component).toBe("settings");
-      expect(matchRoutes(routes, "/dashboard/unknown")?.chain.at(-1)?.component).toBe("not-found");
+      expect(
+        matchRoutes(routes, "/dashboard/settings")?.chain.at(-1)?.component,
+      ).toBe("settings");
+      expect(
+        matchRoutes(routes, "/dashboard/unknown")?.chain.at(-1)?.component,
+      ).toBe("not-found");
     });
   });
 
