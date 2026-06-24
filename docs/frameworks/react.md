@@ -10,6 +10,13 @@ under React 18's concurrent renderer.
 npm install @isorouter/react
 ```
 
+::: tip Live demo
+A full working demo with guards, lazy loading, nested layouts and type-safe
+navigation is available on
+[StackBlitz](https://stackblitz.com/github/pidkhvatylin-my/isorouter/tree/master/demos/react)
+— every key concept is annotated inline.
+:::
+
 ## Quick start
 
 ```tsx
@@ -111,6 +118,25 @@ function User() {
 `useNavigate()` is referentially stable, so it's safe in `useEffect` dependency
 arrays and `useCallback` bodies without re-subscribing.
 
+## Route `title`
+
+A route can declare a `title` to identify itself:
+
+```ts
+{ path: "about", title: "About", component: About }
+```
+
+`title` can also be a function that receives [`GuardContext`](../api/react#types)
+and runs before the component renders — useful for dynamic titles from URL params:
+
+```ts
+{
+  path: "users/:id",
+  title: (ctx) => `User #${ctx.params.id}`,
+  component: lazy(() => import("./User")),
+}
+```
+
 ## Module augmentation
 
 Augmenting the `Register` interface narrows `useRouter()` and `useNavigate()`
@@ -145,5 +171,6 @@ See [Type-safe navigation → Module augmentation](../guide/type-safe-navigation
 ## See also
 
 - [Type-safe navigation](../guide/type-safe-navigation)
+- [Navigation guards](../guide/guards)
 - [Nested layouts](../guide/nested-layouts)
 - [`@isorouter/react` API reference](../api/react)
