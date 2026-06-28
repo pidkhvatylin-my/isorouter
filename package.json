@@ -21,7 +21,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.31.0",
-    "@shikijs/vitepress-twoslash": "^4.2.0",
+    "@shikijs/vitepress-twoslash": "^4.3.0",
     "vitepress": "^1.6.4"
   }
 }
