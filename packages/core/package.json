@@ -52,19 +52,19 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@isorouter/test-utils": "^1.0.0",
-    "@playwright/test": "^1.60.0",
-    "@types/node": "^24.13.2",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.0.1",
     "@virtualstate/navigation": "1.0.1-alpha.212",
-    "@vitest/coverage-v8": "^4.1.0",
-    "eslint": "^10.5.0",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "fast-check": "^4.8.0",
-    "prettier": "^3.8.4",
+    "prettier": "^3.9.1",
     "publint": "^0.3.0",
-    "rolldown": "^1.1.0",
+    "rolldown": "^1.1.3",
     "typescript": "^6.0.0",
-    "typescript-eslint": "^8.61.0",
-    "vite": "^8.0.0",
+    "typescript-eslint": "^8.62.0",
+    "vite": "^8.1.0",
     "vitest": "^4.1.0"
   }
 }
