@@ -12,6 +12,7 @@ import { FakeNavigation } from "@isorouter/test-utils";
 import { lazy } from "../../src/lazy";
 import { createCoreRouter, Router } from "../../src/router";
 import type {
+  GuardContext,
   MetadataContext,
   RouteConfig,
   RouterSnapshot,
@@ -880,5 +881,137 @@ describe("back / forward", () => {
     await flush();
 
     expect(router.getSnapshot()).toBe(before);
+  });
+});
+
+describe("guard context: from", () => {
+  /** Captures the `from` seen by the guard on the route it is attached to. */
+  function spyFrom() {
+    const seen: (GuardContext["from"] | undefined)[] = [];
+    return {
+      seen,
+      guard: (ctx: GuardContext) => {
+        seen.push(ctx.from);
+      },
+    };
+  }
+
+  it("is null on the first navigation after a page load", async () => {
+    const spy = spyFrom();
+    const routes = [
+      { path: "/", component: "home", beforeLoad: spy.guard },
+    ] as const satisfies readonly RouteConfig<string>[];
+
+    new Router(routes).start();
+    await flush();
+
+    expect(spy.seen).toEqual([null]);
+  });
+
+  it("carries the previous committed url and params", async () => {
+    const spy = spyFrom();
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "users/:id", component: "user" },
+      { path: "about", component: "about", beforeLoad: spy.guard },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/users/42");
+    await flush();
+    router.navigate("/about");
+    await flush();
+
+    expect(spy.seen).toHaveLength(1);
+    expect(spy.seen[0]?.url.pathname).toBe("/users/42");
+    expect(spy.seen[0]?.params).toEqual({ id: "42" });
+  });
+
+  it("does not become the next navigation's from when a guard blocks", async () => {
+    const spy = spyFrom();
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "blocked", component: "blocked", beforeLoad: () => false },
+      { path: "about", component: "about", beforeLoad: spy.guard },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/blocked");
+    await flush();
+    router.navigate("/about");
+    await flush();
+
+    // The blocked attempt never committed — from is still the home page.
+    expect(spy.seen[0]?.url.pathname).toBe("/");
+  });
+
+  it("skips the redirecting route and reports the redirect target as from", async () => {
+    const spy = spyFrom();
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "old", beforeLoad: () => "/new" },
+      { path: "new", component: "new" },
+      { path: "about", component: "about", beforeLoad: spy.guard },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/old");
+    await flush();
+    router.navigate("/about");
+    await flush();
+
+    // "/old" never committed; "/new" did.
+    expect(spy.seen[0]?.url.pathname).toBe("/new");
+  });
+
+  it("treats a not-found landing as a committed location", async () => {
+    const spy = spyFrom();
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "about", component: "about", beforeLoad: spy.guard },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/nope" as never);
+    await flush();
+    router.navigate("/about");
+    await flush();
+
+    expect(router.getSnapshot().status).toBe("idle");
+    expect(spy.seen[0]?.url.pathname).toBe("/nope");
+    expect(spy.seen[0]?.params).toEqual({});
+  });
+
+  it("is observed by every guard in the chain, root → leaf", async () => {
+    const parent = spyFrom();
+    const child = spyFrom();
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "dashboard",
+        component: "layout",
+        beforeLoad: parent.guard,
+        children: [
+          { path: "settings", component: "settings", beforeLoad: child.guard },
+        ],
+      },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/dashboard/settings");
+    await flush();
+
+    expect(parent.seen[0]?.url.pathname).toBe("/");
+    expect(child.seen[0]?.url.pathname).toBe("/");
   });
 });

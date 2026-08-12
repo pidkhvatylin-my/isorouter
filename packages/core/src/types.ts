@@ -16,10 +16,28 @@ export interface MetadataContext {
   pathname: string;
 }
 
+/**
+ * Where a navigation came from. Deliberately narrower than `RouterSnapshot` —
+ * a guard needs the previous location, not the previous render (components and
+ * status would tilt this toward carrying a history stack in the guard context).
+ */
+export interface GuardLocation {
+  url: URL;
+  params: Record<string, string>;
+}
+
 export interface GuardContext extends MetadataContext {
   /** Aborts when this navigation is superseded by a newer one. */
   signal: AbortSignal;
   navigationType: NavigationKind;
+  /**
+   * The last **committed** location, or `null` on the first navigation after a
+   * page load. A blocked, redirected or superseded navigation never becomes
+   * anyone's `from`. This is "where from", not a leave-guard (the moment has
+   * passed — you cannot cancel the exit) and not a history direction
+   * (back/forward can't be derived from two URLs).
+   */
+  from: GuardLocation | null;
 }
 
 /**

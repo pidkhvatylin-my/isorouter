@@ -13,6 +13,7 @@ export type {
   BeforeLoad,
   ExtractParams,
   GuardContext,
+  GuardLocation,
   Href,
   MetadataContext,
   NavTarget,
