@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "@isorouter/core": "1.2.1",
+    "@isorouter/react": "1.2.1",
+    "@isorouter/svelte": "1.2.1",
+    "@isorouter/test-utils": "1.0.0",
+    "@isorouter/vue": "1.2.1"
+  },
+  "changesets": []
+}
