@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("renders a layout's index child and applies the layout's title", async ({
+test("renders a layout's index child and applies the layout's metadata via onCommit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -12,7 +12,7 @@ test("renders a layout's index child and applies the layout's title", async ({
   await expect(page).toHaveTitle("Dashboard");
 });
 
-test("renders a nested child inside its parent's outlet and the deepest title wins", async ({
+test("renders a nested child inside its parent's outlet and the deepest metadata wins", async ({
   page,
 }) => {
   await page.goto("/");

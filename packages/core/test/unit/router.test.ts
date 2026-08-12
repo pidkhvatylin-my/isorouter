@@ -11,7 +11,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeNavigation } from "@isorouter/test-utils";
 import { lazy } from "../../src/lazy";
 import { createCoreRouter, Router } from "../../src/router";
-import type { GuardContext, RouteConfig } from "../../src/types";
+import type {
+  MetadataContext,
+  RouteConfig,
+  RouterSnapshot,
+} from "../../src/types";
 
 let nav: FakeNavigation;
 
@@ -19,7 +23,6 @@ beforeEach(() => {
   nav = new FakeNavigation("http://localhost/");
   vi.stubGlobal("navigation", nav);
   vi.stubGlobal("location", new URL("http://localhost/"));
-  vi.stubGlobal("document", { title: "" });
 });
 
 afterEach(() => {
@@ -41,7 +44,7 @@ function deferred<T = void>(): {
 }
 
 const basicRoutes = [
-  { path: "/", component: "home", title: "Home" },
+  { path: "/", component: "home", metadata: { title: "Home" } },
   { path: "about", component: "about" },
 ] as const satisfies readonly RouteConfig<string>[];
 
@@ -132,9 +135,9 @@ describe("running without browser globals", () => {
     expect(router.getSnapshot().url.href).toBe("http://localhost/");
   });
 
-  it("does not touch document.title when document is unavailable", async () => {
+  it("commits successfully with no document global at all", async () => {
     vi.stubGlobal("document", undefined);
-    const router = new Router(basicRoutes); // "/" has title: "Home"
+    const router = new Router(basicRoutes);
 
     router.start();
     await flush();
@@ -476,20 +479,78 @@ describe("abort / race", () => {
 });
 
 describe("onCommit", () => {
-  it("is called with the committed snapshot on success, but not for not-found", async () => {
+  it("is called with the committed snapshot on success", async () => {
     const onCommit = vi.fn();
     const router = new Router(basicRoutes, { onCommit });
 
     router.start();
     await flush();
+
     expect(onCommit).toHaveBeenCalledTimes(1);
     expect(onCommit).toHaveBeenLastCalledWith(router.getSnapshot());
+  });
 
+  it("also fires for a not-found landing, so the app can retitle a 404", async () => {
+    const onCommit = vi.fn();
+    const router = new Router(basicRoutes, { onCommit });
+
+    router.start();
+    await flush();
     router.navigate("/does-not-exist" as never);
     await flush();
 
-    expect(onCommit).toHaveBeenCalledTimes(1); // not called again
-    expect(router.getSnapshot().status).toBe("not-found");
+    expect(onCommit).toHaveBeenCalledTimes(2);
+    expect(onCommit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "not-found" }),
+    );
+  });
+
+  it("also fires for an error landing", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "boom",
+        component: "boom",
+        beforeLoad: () => {
+          throw new Error("boom");
+        },
+      },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const onCommit = vi.fn();
+    const router = new Router(routes, { onCommit, onError: () => undefined });
+
+    router.start();
+    await flush();
+    router.navigate("/boom");
+    await flush();
+
+    expect(onCommit).toHaveBeenCalledTimes(2);
+    expect(onCommit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "error" }),
+    );
+  });
+
+  it("does not fire for a navigation a guard blocks or redirects", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "blocked", component: "blocked", beforeLoad: () => false },
+      { path: "old", beforeLoad: () => "/" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const onCommit = vi.fn();
+    const router = new Router(routes, { onCommit });
+
+    router.start();
+    await flush();
+    onCommit.mockClear();
+
+    router.navigate("/blocked");
+    await flush();
+    router.navigate("/old");
+    await flush();
+
+    // Only the restore / redirect targets settle — never "/blocked" or "/old".
+    for (const call of onCommit.mock.calls)
+      expect((call[0] as RouterSnapshot<string>).url.pathname).toBe("/");
   });
 });
 
@@ -577,16 +638,19 @@ describe("normalizePath (trailing-slash stripping)", () => {
   });
 });
 
-describe("title", () => {
-  it("applies the deepest title in the matched chain", async () => {
+describe("metadata", () => {
+  it("shallow-merges root -> leaf, a child key overriding its parent", async () => {
     const routes = [
       {
         path: "dashboard",
         component: "layout",
-        title: "Dashboard",
+        metadata: { title: "Dashboard", layout: "sidebar" },
         children: [
-          { path: "settings", component: "settings", title: "Settings" },
-          { path: "overview", component: "overview" },
+          {
+            path: "settings",
+            component: "settings",
+            metadata: { title: "Settings" },
+          },
         ],
       },
     ] as const satisfies readonly RouteConfig<string>[];
@@ -594,22 +658,112 @@ describe("title", () => {
 
     router.start();
     await flush();
-
     router.navigate("/dashboard/settings");
     await flush();
-    expect(document.title).toBe("Settings");
 
-    router.navigate("/dashboard/overview");
-    await flush();
-    expect(document.title).toBe("Dashboard");
+    expect(router.getSnapshot().metadata).toEqual({
+      title: "Settings",
+      layout: "sidebar",
+    });
   });
 
-  it("invokes a function title with the guard context", async () => {
+  it("inherits parent keys absent from the child", async () => {
+    const routes = [
+      {
+        path: "dashboard",
+        component: "layout",
+        metadata: { layout: "sidebar" },
+        children: [{ path: "overview", component: "overview" }],
+      },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/dashboard/overview");
+    await flush();
+
+    expect(router.getSnapshot().metadata).toEqual({ layout: "sidebar" });
+  });
+
+  it("replaces nested objects wholesale rather than deep-merging them", async () => {
+    const routes = [
+      {
+        path: "dashboard",
+        component: "layout",
+        metadata: { breadcrumb: { label: "Dashboard", icon: "home" } },
+        children: [
+          {
+            path: "settings",
+            component: "settings",
+            metadata: { breadcrumb: { label: "Settings" } },
+          },
+        ],
+      },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/dashboard/settings");
+    await flush();
+
+    expect(router.getSnapshot().metadata).toEqual({
+      breadcrumb: { label: "Settings" },
+    });
+  });
+
+  it("yields {} for a chain with no metadata", async () => {
+    const router = new Router(basicRoutes);
+
+    router.start();
+    await flush();
+    router.navigate("/about");
+    await flush();
+
+    expect(router.getSnapshot().metadata).toEqual({});
+  });
+
+  it("resets metadata to {} on a not-found navigation", async () => {
+    const router = new Router(basicRoutes); // "/" carries { title: "Home" }
+
+    router.start();
+    await flush();
+    router.navigate("/does-not-exist" as never);
+    await flush();
+
+    expect(router.getSnapshot().status).toBe("not-found");
+    expect(router.getSnapshot().metadata).toEqual({});
+  });
+
+  it("does not mutate a route's static config object across navigations", async () => {
+    const staticMeta = { title: "Home" };
+    const routes = [
+      { path: "/", component: "home", metadata: staticMeta },
+      { path: "about", component: "about", metadata: { title: "About" } },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/about");
+    await flush();
+    router.navigate("/");
+    await flush();
+
+    expect(staticMeta).toEqual({ title: "Home" });
+    expect(router.getSnapshot().metadata).toEqual({ title: "Home" });
+  });
+
+  it("passes params/url to a metadata function via MetadataContext", async () => {
     const routes = [
       {
         path: "concerts/:city",
         component: "concerts",
-        title: (ctx: GuardContext) => `Concerts in ${ctx.params.city}`,
+        metadata: (ctx: MetadataContext) => ({
+          title: `Concerts in ${ctx.params.city}`,
+          pathname: ctx.pathname,
+        }),
       },
     ] as const satisfies readonly RouteConfig<string>[];
     const router = new Router(routes);
@@ -619,20 +773,80 @@ describe("title", () => {
     router.navigate("/concerts/kyiv");
     await flush();
 
-    expect(document.title).toBe("Concerts in kyiv");
+    expect(router.getSnapshot().metadata).toEqual({
+      title: "Concerts in kyiv",
+      pathname: "/concerts/kyiv",
+    });
   });
 
-  it("leaves document.title untouched when no route in the chain has one", async () => {
-    document.title = "untouched";
+  it("merges functions and static objects mixed in one chain identically", async () => {
     const routes = [
-      { path: "/", component: "home" },
+      {
+        path: "dashboard",
+        component: "layout",
+        metadata: (ctx: MetadataContext) => ({ pathname: ctx.pathname }),
+        children: [
+          {
+            path: "settings",
+            component: "settings",
+            metadata: { title: "Settings" },
+          },
+        ],
+      },
     ] as const satisfies readonly RouteConfig<string>[];
     const router = new Router(routes);
 
     router.start();
     await flush();
+    router.navigate("/dashboard/settings");
+    await flush();
 
-    expect(document.title).toBe("untouched");
+    expect(router.getSnapshot().metadata).toEqual({
+      pathname: "/dashboard/settings",
+      title: "Settings",
+    });
+  });
+
+  it("does not call a metadata function when a guard blocks the navigation", async () => {
+    const metadataFn = vi.fn(() => ({ title: "Blocked" }));
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "blocked",
+        component: "blocked",
+        beforeLoad: () => false,
+        metadata: metadataFn,
+      },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/blocked");
+    await flush();
+
+    expect(metadataFn).not.toHaveBeenCalled();
+  });
+
+  it("does not call a metadata function when a guard redirects the navigation", async () => {
+    const metadataFn = vi.fn(() => ({ title: "Redirect" }));
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "redirect",
+        beforeLoad: () => "/about",
+        metadata: metadataFn,
+      },
+      { path: "about", component: "about" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+
+    router.start();
+    await flush();
+    router.navigate("/redirect");
+    await flush();
+
+    expect(metadataFn).not.toHaveBeenCalled();
   });
 });
 

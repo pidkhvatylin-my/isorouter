@@ -9,14 +9,40 @@ export type Awaitable<T> = T | Promise<T>;
 
 export type NavigationKind = "reload" | "push" | "replace" | "traverse";
 
-export interface GuardContext {
+/** Read-only view of the destination, passed to a `metadata` function. */
+export interface MetadataContext {
   params: Record<string, string>;
   url: URL;
   pathname: string;
+}
+
+export interface GuardContext extends MetadataContext {
   /** Aborts when this navigation is superseded by a newer one. */
   signal: AbortSignal;
   navigationType: NavigationKind;
 }
+
+/**
+ * Arbitrary per-route data the router carries but never acts on: titles, meta
+ * tags, breadcrumbs — whatever the app needs. Empty by design; augment it to
+ * type the keys you use:
+ *
+ * ```ts
+ * declare module "@isorouter/core" {
+ *   interface RouteMetadata {
+ *     title?: string;
+ *   }
+ * }
+ * ```
+ *
+ * Augmenting types the keys you declare, but the inherited index signature
+ * still admits any other key — a misspelled one included.
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- no own members by design: this is the interface apps augment. The index signature keeps un-augmented use assignable.
+export interface RouteMetadata extends Record<
+  string | number | symbol,
+  unknown
+> {}
 
 /**
  * Navigation guard. Runs root → leaf before the matched components commit.
@@ -33,8 +59,11 @@ export interface RouteConfig<C = unknown> {
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  /** Sets document.title on commit. Deepest title in the chain wins. */
-  title?: string | ((ctx: GuardContext) => string);
+  /**
+   * Merged root → leaf across the matched chain; deeper routes override keys.
+   * A function form must be synchronous and pure — it is resolved during commit.
+   */
+  metadata?: RouteMetadata | ((ctx: MetadataContext) => RouteMetadata);
   children?: readonly RouteConfig<C>[];
 }
 
@@ -44,6 +73,11 @@ export type ScrollMode = "after-transition" | "manual";
 export interface RouterOptions {
   scroll?: ScrollMode;
   onError?: (err: unknown) => void;
+  /**
+   * Called with every snapshot the router settles on — including `not-found`
+   * and `error`, so a 404 landing can update the title too. Blocked,
+   * redirected and superseded navigations never settle, so never fire it.
+   */
   onCommit?: (snapshot: RouterSnapshot<unknown>) => void;
 }
 
@@ -57,6 +91,7 @@ export interface RouterSnapshot<C> {
   url: URL;
   status: RouterStatus;
   error: unknown;
+  metadata: RouteMetadata;
 }
 
 export interface RouteMatch<C = unknown> {

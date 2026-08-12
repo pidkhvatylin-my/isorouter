@@ -101,13 +101,19 @@ type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 interface LazyComponent<C> {
   (): Promise<{ default: C }>;
 }
+interface MetadataContext {
+  params: Record<string, string>;
+  url: URL;
+  pathname: string;
+}
+interface RouteMetadata extends Record<string | number | symbol, unknown> {}
 // ---cut---
 interface RouteConfig<C = unknown> {
   path?: string;
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  title?: string | ((ctx: GuardContext) => string);
+  metadata?: RouteMetadata | ((ctx: MetadataContext) => RouteMetadata);
   children?: readonly RouteConfig<C>[];
 }
 ```
@@ -122,12 +128,16 @@ interface RouteConfig<C = unknown> {
   to `snapshot.components`.
 - **`children`** — nested routes. A matched parent with no matching child still
   resolves on its own if the path is fully consumed.
-- **`title`** — sets `document.title` on commit. The **deepest** route in the
-  matched chain that defines a `title` wins.
+- **`metadata`** — arbitrary per-route data, merged root → leaf across the
+  matched chain (deeper routes override keys). The core never interprets it —
+  see [`RouteMetadata` & `MetadataContext`](#routemetadata-metadatacontext)
+  below.
 
 ### `RouterSnapshot`
 
 ```ts twoslash
+interface RouteMetadata extends Record<string | number | symbol, unknown> {}
+// ---cut---
 interface RouterSnapshot<C> {
   /** Matched chain's components, root → leaf (routes with no component removed). */
   components: C[];
@@ -135,6 +145,7 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  metadata: RouteMetadata;
 }
 ```
 
@@ -176,6 +187,37 @@ same-origin `string` to redirect (`replace`); a cross-origin string throws
 (`status: "error"`) rather than navigating. See
 [Navigation guards](../guide/guards).
 
+### `RouteMetadata` & `MetadataContext`
+
+```ts twoslash
+// ---cut---
+interface MetadataContext {
+  params: Record<string, string>;
+  url: URL;
+  pathname: string;
+}
+
+interface RouteMetadata extends Record<string | number | symbol, unknown> {}
+```
+
+`RouteMetadata` is empty by design — the router carries it but never acts on
+it. Augment it via declaration merging to type the keys your app uses:
+
+```ts twoslash
+// @noErrors
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+```
+
+`MetadataContext` is a narrower `GuardContext`: no `signal` or
+`navigationType`, since a metadata function isn't part of the guard pipeline.
+A function form must be **synchronous and pure** — it's resolved during
+commit, and it is **not called** for a navigation a guard blocks or redirects.
+See [Route metadata](../guide/routing#route-metadata).
+
 ## `lazy(loader)`
 
 ```ts twoslash
@@ -212,15 +254,18 @@ interface RouterOptions {
 - **`scroll`** — `"after-transition"` (default) restores/resets scroll once the
   commit settles; `"manual"` leaves scroll to you.
 - **`onError`** — called with any error thrown during a guard or lazy import.
-- **`onCommit`** — called with each committed snapshot.
+- **`onCommit`** — called with every snapshot the router **settles** on, which
+  includes `not-found` and `error` landings — so a 404 can retitle the document
+  like any other page. A navigation a guard blocks or redirects never settles,
+  so it never fires.
 
 ## Exports
 
 `createCoreRouter`, `Router`, `matchRoutes`, `lazy`, `isLazy`, and the types
 `AnyRouter`, `Unsubscribe`, `LazyComponent`, `Awaitable`, `BeforeLoad`,
-`ExtractParams`, `GuardContext`, `Href`, `NavTarget`, `NavigationKind`,
-`ResolveRegister`, `RouteConfig`, `RouteMatch`, `RouteTemplate`, `RouterOptions`,
-`RouterSnapshot`.
+`ExtractParams`, `GuardContext`, `Href`, `MetadataContext`, `NavTarget`,
+`NavigationKind`, `ResolveRegister`, `RouteConfig`, `RouteMatch`,
+`RouteMetadata`, `RouteTemplate`, `RouterOptions`, `RouterSnapshot`.
 
 ## Other targets (TypeScript)
 

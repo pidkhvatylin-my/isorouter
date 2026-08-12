@@ -9,7 +9,7 @@ import type { SvelteComponentType } from "../../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
 export const routes = [
-  { path: "/", component: Home, title: "Home" },
+  { path: "/", component: Home, metadata: { title: "Home" } },
   { path: "about", component: About },
   { path: "concerts/:city", component: Concerts },
   {

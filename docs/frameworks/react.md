@@ -103,6 +103,7 @@ All hooks must be used within `<Router>`.
 | `useRouterState()`   | the current `RouterSnapshot`, re-rendering on every commit.                    |
 | `useParams<P>()`     | `snapshot.params`, typed as `P`.                                               |
 | `useLocation()`      | `snapshot.url`.                                                                |
+| `useMetadata()`      | `snapshot.metadata`.                                                           |
 | `useNavigate()`      | a referentially-stable `(to, opts?) => void` bound to `router.navigate`.       |
 
 ```tsx
@@ -118,23 +119,37 @@ function User() {
 `useNavigate()` is referentially stable, so it's safe in `useEffect` dependency
 arrays and `useCallback` bodies without re-subscribing.
 
-## Route `title`
+## Route metadata
 
-A route can declare a `title` to identify itself:
+A route can declare `metadata` to carry arbitrary per-route data — the core
+never acts on it:
 
 ```ts
-{ path: "about", title: "About", component: About }
+{ path: "about", metadata: { title: "About" }, component: About }
 ```
 
-`title` can also be a function that receives [`GuardContext`](../api/react#types)
-and runs before the component renders — useful for dynamic titles from URL params:
+`metadata` can also be a function that receives
+[`MetadataContext`](../api/core#routemetadata-metadatacontext) (`params`,
+`url`, `pathname`) — useful for values derived from URL params:
 
 ```ts
 {
   path: "users/:id",
-  title: (ctx) => `User #${ctx.params.id}`,
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
   component: lazy(() => import("./User")),
 }
+```
+
+Read it back with `useMetadata()`. Since nothing writes `document.title` for
+you anymore, wire it up yourself via `onCommit`:
+
+```ts
+const router = createRouter(routes, {
+  onCommit: (snapshot) => {
+    if (typeof snapshot.metadata.title === "string")
+      document.title = snapshot.metadata.title;
+  },
+});
 ```
 
 ## Module augmentation

@@ -134,7 +134,7 @@ const router = createRouter([{ path: "/", component: Home }] as const);
 
 ## API (shared across adapters)
 
-- **Route config**: `{ path?, index?, component?, beforeLoad?, title?, children? }`
+- **Route config**: `{ path?, index?, component?, beforeLoad?, metadata?, children? }`
   — `component` may be a value or `lazy(() => import(...))`.
 - **Guards**: `beforeLoad(ctx)` runs root→leaf. Return `false` to block (restores
   current URL), a `string` to redirect, or nothing to allow. `ctx.signal` aborts

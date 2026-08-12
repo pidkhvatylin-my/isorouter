@@ -11,7 +11,7 @@ interface Route {
   index?: boolean;
   component?: unknown; // a value or lazy(() => import(...))
   beforeLoad?: unknown;
-  title?: string | ((ctx: unknown) => string);
+  metadata?: unknown | ((ctx: unknown) => unknown);
   children?: readonly Route[];
 }
 ```
@@ -84,6 +84,8 @@ with no matching child still resolves on its own if the path is fully consumed.
 Every commit produces an immutable `RouterSnapshot`:
 
 ```ts twoslash
+interface RouteMetadata extends Record<string | number | symbol, unknown> {}
+// ---cut---
 interface RouterSnapshot<C> {
   /** Matched chain's components, root → leaf (routes with no component removed). */
   components: C[];
@@ -91,20 +93,24 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  metadata: RouteMetadata;
 }
 ```
 
 - `components` is the matched chain, root → leaf — render `components[0]` and
   let each layout pull in the next with [`<Outlet>`](./nested-layouts).
 - `status` drives the loading / not-found / error UI in the adapters.
+- `metadata` is the merged result of every matched route's `metadata` (below).
 
 See the [core API reference](../api/core) for the full surface.
 
-## Setting the document title
+## Route metadata
 
-A route can set `document.title` on commit via `title` — a string or a function
-of the guard context. The **deepest** route in the matched chain that defines a
-`title` wins:
+The core carries a `metadata` bag per route but never acts on it — no DOM side
+effects live in `@isorouter/core`. `metadata` is a plain object or a function
+of `MetadataContext` (`params`, `url`, `pathname`); across the matched chain,
+it's **shallow-merged root → leaf**, so a deeper route's keys override its
+ancestors':
 
 ```ts twoslash
 import { createCoreRouter } from "@isorouter/core";
@@ -115,7 +121,38 @@ const router = createCoreRouter([
   {
     path: "/users/:id",
     component: User,
-    title: (ctx) => `User ${ctx.params.id}`,
+    metadata: (ctx) => ({ title: `User ${ctx.params.id}` }),
   },
 ] as const);
 ```
+
+A function form must be **synchronous and pure** — it's resolved during
+commit, and it's **not called** for a navigation a guard blocks or redirects.
+
+Since nothing writes `document.title` for you anymore, wire it up yourself
+with `onCommit`:
+
+```ts twoslash
+import { createCoreRouter } from "@isorouter/core";
+
+declare const User: unknown;
+// ---cut---
+const router = createCoreRouter(
+  [
+    {
+      path: "/users/:id",
+      component: User,
+      metadata: (ctx) => ({ title: `User ${ctx.params.id}` }),
+    },
+  ] as const,
+  {
+    onCommit: (snapshot) => {
+      if (typeof snapshot.metadata.title === "string")
+        document.title = snapshot.metadata.title;
+    },
+  },
+);
+```
+
+Augment `RouteMetadata` via declaration merging to type the keys your app
+uses — see [`RouteMetadata` & `MetadataContext`](../api/core#routemetadata-metadatacontext).
