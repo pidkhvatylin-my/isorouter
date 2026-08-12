@@ -7,11 +7,13 @@ on:
     branches:
       - master
       - develop
+      - "1.x"
       - "release/**"
   pull_request:
     branches:
       - master
       - develop
+      - "1.x"
       - "release/**"
 
 concurrency:
