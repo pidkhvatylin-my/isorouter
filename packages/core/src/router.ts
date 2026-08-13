@@ -27,7 +27,7 @@ export type Unsubscribe = () => void;
 
 const NOOP = () => undefined;
 const SAFE_ORIGIN = "http://localhost/";
-const EMPTY_METADATA: RouteMetadata = {};
+const EMPTY_METADATA: RouteMetadata = Object.freeze({});
 
 function initialUrl(): URL {
   return new URL(typeof location !== "undefined" ? location.href : SAFE_ORIGIN);
