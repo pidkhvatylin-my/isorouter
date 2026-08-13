@@ -2,6 +2,7 @@ export { lazy } from "@isorouter/core";
 export type {
   BeforeLoad,
   GuardContext,
+  GuardLocation,
   Href,
   MetadataContext,
   NavTarget,
