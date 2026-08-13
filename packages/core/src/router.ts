@@ -16,6 +16,7 @@ import type {
   MetadataContext,
   NavTarget,
   NavigationKind,
+  RedirectTarget,
   RouteConfig,
   RouteMetadata,
   RouterOptions,
@@ -58,6 +59,22 @@ function mergeMetadata<C>(
   }
 
   return merged ?? EMPTY_METADATA;
+}
+
+type GuardOutcome =
+  | { kind: "allow" }
+  | { kind: "block" }
+  | { kind: "redirect"; target: RedirectTarget };
+
+/** Collapses every `beforeLoad` return shape into one so the commit loop is uniform. */
+function normalizeGuardResult(
+  r: void | boolean | string | RedirectTarget,
+): GuardOutcome {
+  if (r == null || r === true) return { kind: "allow" };
+  if (r === false) return { kind: "block" };
+  if (typeof r === "string")
+    return { kind: "redirect", target: { to: r, replace: true } };
+  return { kind: "redirect", target: { replace: true, ...r } }; // default replace; object overrides
 }
 
 /**
@@ -271,29 +288,31 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       for (const route of matched.chain) {
         if (!route.beforeLoad) continue;
 
-        const result = await route.beforeLoad(ctx);
+        const outcome = normalizeGuardResult(await route.beforeLoad(ctx));
 
         if (abortController.signal.aborted) return;
 
-        if (result === false) {
+        if (outcome.kind === "block") {
           this.#navigateRaw(this.#snapshot.url.href, true); // restore
           return;
         }
 
-        if (typeof result === "string") {
-          // Guard strings may be user-derived (e.g. a ?next= param); reject
+        if (outcome.kind === "redirect") {
+          const { target } = outcome;
+
+          // Guard targets may be user-derived (e.g. a ?next= param); reject
           // cross-origin targets so a guard can't be turned into an open
           // redirect. Resolving against the current URL also catches
           // protocol-relative (//evil.com) and opaque (javascript:) targets,
           // whose origin won't match. Same-origin / relative paths pass through.
-          const target = new URL(result, this.#snapshot.url.href);
-          if (target.origin !== this.#snapshot.url.origin)
+          const url = new URL(target.to, this.#snapshot.url.href);
+          if (url.origin !== this.#snapshot.url.origin)
             throw new Error(
               `[isorouter] beforeLoad returned a cross-origin redirect ` +
-                `("${result}"); only same-origin paths are allowed`,
+                `("${target.to}"); only same-origin paths are allowed`,
             );
 
-          this.#navigateRaw(result, true); // redirect
+          this.#navigateRaw(target.to, target.replace ?? true, target.state); // redirect
           return;
         }
       }

@@ -18,6 +18,7 @@ export type {
   MetadataContext,
   NavTarget,
   NavigationKind,
+  RedirectTarget,
   ResolveRegister,
   RouteConfig,
   RouteMatch,

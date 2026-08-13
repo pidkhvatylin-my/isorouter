@@ -54,15 +54,26 @@ export interface RouteMetadata extends Record<
   unknown
 > {}
 
+/** Richer redirect a guard can return in place of a plain string. */
+export interface RedirectTarget {
+  /** Same-origin path to redirect to. Cross-origin targets are rejected. */
+  to: string;
+  /** `true` (default) replaces the current entry; `false` pushes a new one. */
+  replace?: boolean;
+  /** History state to attach to the redirect navigation. */
+  state?: unknown;
+}
+
 /**
  * Navigation guard. Runs root → leaf before the matched components commit.
- *  - `undefined` / `true` → allow
- *  - `false`              → block (current URL is restored)
- *  - `string`             → redirect (replace) to that path
+ *  - `undefined` / `true`  → allow
+ *  - `false`               → block (current URL is restored)
+ *  - `string`              → redirect (replace) to that path
+ *  - `RedirectTarget`      → redirect with control over push/replace and state
  */
 export type BeforeLoad = (
   ctx: GuardContext,
-) => Awaitable<void | boolean | string>;
+) => Awaitable<void | boolean | string | RedirectTarget>;
 
 export interface RouteConfig<C = unknown> {
   path?: string;

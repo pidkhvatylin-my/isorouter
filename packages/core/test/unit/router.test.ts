@@ -299,6 +299,7 @@ describe("guards", () => {
       { path: "about", component: "about" },
     ] as const satisfies readonly RouteConfig<string>[];
     const router = new Router(routes);
+    const navigateSpy = vi.spyOn(nav, "navigate");
 
     router.start();
     await flush();
@@ -309,12 +310,107 @@ describe("guards", () => {
     expect(snapshot.url.pathname).toBe("/about");
     expect(snapshot.status).toBe("idle");
     expect(snapshot.components).toEqual(["about"]);
+
+    // A plain string still redirects with `replace: true`.
+    const redirectCall = navigateSpy.mock.calls.find(([to]) => to === "/about");
+    expect(redirectCall?.[1]).toMatchObject({ history: "replace" });
   });
 
   it("rejects a cross-origin redirect from a guard instead of navigating away", async () => {
     const routes = [
       { path: "/", component: "home" },
       { path: "evil", beforeLoad: () => "https://evil.com" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const onError = vi.fn();
+    const router = new Router(routes, { onError });
+
+    router.start();
+    await flush();
+    router.navigate("/evil");
+    await flush();
+
+    const snapshot = router.getSnapshot();
+    expect(snapshot.status).toBe("error");
+    expect(snapshot.url.origin).not.toBe("https://evil.com");
+    expect(onError).toHaveBeenCalledOnce();
+    expect(snapshot.error).toBeInstanceOf(Error);
+    expect((snapshot.error as Error).message).toMatch(/cross-origin redirect/);
+  });
+
+  it("redirects with a push when beforeLoad returns a RedirectTarget with replace: false", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "redirect",
+        beforeLoad: () => ({ to: "/about", replace: false }),
+      },
+      { path: "about", component: "about" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+    const navigateSpy = vi.spyOn(nav, "navigate");
+
+    router.start();
+    await flush();
+    router.navigate("/redirect");
+    await flush();
+
+    const snapshot = router.getSnapshot();
+    expect(snapshot.url.pathname).toBe("/about");
+    expect(snapshot.status).toBe("idle");
+
+    const redirectCall = navigateSpy.mock.calls.find(([to]) => to === "/about");
+    expect(redirectCall?.[1]).toMatchObject({ history: "push" });
+  });
+
+  it("redirects (replace) when beforeLoad returns a RedirectTarget without an explicit replace", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "redirect", beforeLoad: () => ({ to: "/about" }) },
+      { path: "about", component: "about" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+    const navigateSpy = vi.spyOn(nav, "navigate");
+
+    router.start();
+    await flush();
+    router.navigate("/redirect");
+    await flush();
+
+    expect(router.getSnapshot().url.pathname).toBe("/about");
+
+    const redirectCall = navigateSpy.mock.calls.find(([to]) => to === "/about");
+    expect(redirectCall?.[1]).toMatchObject({ history: "replace" });
+  });
+
+  it("passes state through when beforeLoad returns a RedirectTarget", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      {
+        path: "redirect",
+        beforeLoad: () => ({ to: "/about", state: { from: "guard" } }),
+      },
+      { path: "about", component: "about" },
+    ] as const satisfies readonly RouteConfig<string>[];
+    const router = new Router(routes);
+    const navigateSpy = vi.spyOn(nav, "navigate");
+
+    router.start();
+    await flush();
+    router.navigate("/redirect");
+    await flush();
+
+    expect(router.getSnapshot().url.pathname).toBe("/about");
+
+    const redirectCall = navigateSpy.mock.calls.find(([to]) => to === "/about");
+    expect(redirectCall?.[1]).toMatchObject({
+      state: { from: "guard" },
+    });
+  });
+
+  it("rejects a cross-origin RedirectTarget from a guard instead of navigating away", async () => {
+    const routes = [
+      { path: "/", component: "home" },
+      { path: "evil", beforeLoad: () => ({ to: "https://evil.com" }) },
     ] as const satisfies readonly RouteConfig<string>[];
     const onError = vi.fn();
     const router = new Router(routes, { onError });
