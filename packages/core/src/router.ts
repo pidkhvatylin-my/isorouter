@@ -12,6 +12,7 @@ import { matchRoutes } from "./matcher";
 
 import type {
   GuardContext,
+  GuardLocation,
   MetadataContext,
   NavTarget,
   NavigationKind,
@@ -89,6 +90,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
   #commitAbort: AbortController | null = null;
   #started = false;
   #listener = (e: NavigateEvent) => this.#onNavigate(e);
+  #committed: GuardLocation | null = null;
 
   constructor(routes: T, options: RouterOptions = {}) {
     this.routes = routes;
@@ -123,13 +125,22 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
   }
 
   /**
-   * Publishes a *terminal* snapshot — one the router settles on — and notifies
-   * `onCommit`. Every exit from `#commit` that lands on a URL goes through
-   * here, including not-found and error: the app owns `document.title` now, so
-   * a 404 landing has to reach it too. Blocked, redirected and superseded
-   * navigations return earlier and never settle.
+   * Publishes a *terminal* snapshot — one the router settles on — records it as
+   * the next navigation's `from`, and notifies `onCommit`. Every exit from
+   * `#commit` that lands on a URL goes through here, including not-found and
+   * error: the app owns `document.title` now, so a 404 landing has to reach it
+   * too, and the user is looking at that address. Blocked, redirected and
+   * superseded navigations return earlier and never settle — so the `from`
+   * invariant holds structurally rather than by updating a field at each call
+   * site.
    */
-  #settle(patch: Partial<RouterSnapshot<C>>): void {
+  #settle(
+    patch: Partial<RouterSnapshot<C>> & {
+      url: URL;
+      params: Record<string, string>;
+    },
+  ): void {
+    this.#committed = { url: patch.url, params: patch.params };
     this.#emit(patch);
     this.#options.onCommit?.(this.#snapshot);
   }
@@ -254,6 +265,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         pathname: url.pathname,
         signal: abortController.signal,
         navigationType,
+        from: this.#committed,
       };
 
       for (const route of matched.chain) {

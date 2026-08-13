@@ -16,10 +16,20 @@ export interface MetadataContext {
   pathname: string;
 }
 
+/**
+ * Where a navigation came from. Deliberately narrower than `RouterSnapshot` —
+ * a guard needs the previous location, not the previous render (components and
+ * status would tilt this toward carrying a history stack in the guard context).
+ */
+export interface GuardLocation {
+  url: URL;
+  params: Record<string, string>;
+}
+
 export interface GuardContext extends MetadataContext {
-  /** Aborts when this navigation is superseded by a newer one. */
-  signal: AbortSignal;
   navigationType: NavigationKind;
+  from: GuardLocation | null;
+  signal: AbortSignal;
 }
 
 /**

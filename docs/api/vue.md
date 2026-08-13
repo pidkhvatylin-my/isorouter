@@ -26,8 +26,9 @@ npm install @isorouter/vue
 ## Types
 
 `AnyVueRouter`, `VueComponentType`, `Register`, `RegisteredRouter`, plus the
-core re-exports `BeforeLoad`, `GuardContext`, `Href`, `MetadataContext`,
-`NavTarget`, `RouteConfig`, `RouteMetadata`, `RouterOptions`, `RouterSnapshot`.
+core re-exports `BeforeLoad`, `GuardContext`, `GuardLocation`, `Href`,
+`MetadataContext`, `NavTarget`, `RouteConfig`, `RouteMetadata`, `RouterOptions`,
+`RouterSnapshot`.
 
 Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
 router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
