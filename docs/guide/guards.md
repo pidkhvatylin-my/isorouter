@@ -9,13 +9,20 @@ navigation never flashes the target UI.
 ```ts twoslash
 type Awaitable<T> = T | Promise<T>;
 
+interface GuardLocation {
+  url: URL;
+  params: Record<string, string>;
+}
+
 interface GuardContext {
   params: Record<string, string>;
   url: URL;
   pathname: string;
+  navigationType: "reload" | "push" | "replace" | "traverse";
+  /** Where the navigation came from, or `null` on the first load. */
+  from: GuardLocation | null;
   /** Aborts when this navigation is superseded by a newer one. */
   signal: AbortSignal;
-  navigationType: "reload" | "push" | "replace" | "traverse";
 }
 
 type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
@@ -53,6 +60,44 @@ the router throws instead of navigating and the snapshot moves to
 `status: "error"` — this closes the open-redirect class where a user-derived
 `?next=` could send visitors to an external site. Same-origin and relative paths
 are unaffected.
+:::
+
+## Where the navigation came from: `from`
+
+Every guard sees `ctx.from` — the location the user is **leaving**, as
+`{ url, params }`, or `null` on the very first navigation after a page load.
+
+```ts twoslash
+import { createCoreRouter } from "@isorouter/core";
+
+declare const Dashboard: unknown;
+declare function track(event: string, data: unknown): void;
+// ---cut---
+const router = createCoreRouter([
+  {
+    path: "/dashboard",
+    component: Dashboard,
+    beforeLoad: ({ url, from }) => {
+      // Referrer analytics — `from` is null on a cold load, so guard with `?.`
+      track("nav", { to: url.pathname, from: from?.url.pathname ?? "(direct)" });
+
+      // Origin-aware redirect: skip the intro when arriving from inside the app.
+      if (from?.url.pathname.startsWith("/app")) return "/app/dashboard";
+    },
+  },
+] as const);
+```
+
+`from` is the last location the router **committed** — never a navigation that
+was blocked, redirected, or superseded mid-flight, so the next guard always sees
+the location the user actually saw. A `not-found` or `error` landing *does*
+count: the URL changed and the user is looking at that address.
+
+::: tip Where from, not a leave-guard
+`from` answers "where did we come from", not "may we leave". You can't cancel
+the exit from here — by the time a guard runs, that navigation has already
+started. It's also not a history direction: back vs. forward can't be inferred
+from two URLs (use `navigationType` for `"traverse"`).
 :::
 
 ## Async guards & the abort signal

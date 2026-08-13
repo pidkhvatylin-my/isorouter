@@ -27,8 +27,8 @@ npm install @isorouter/react
 
 `RouterProps`, `LinkProps`, `AnyReactRouter`, `ReactComponentType`, `Register`,
 `RegisteredRouter`, plus the core re-exports `BeforeLoad`, `GuardContext`,
-`Href`, `MetadataContext`, `NavTarget`, `RouteConfig`, `RouteMetadata`,
-`RouterOptions`, `RouterSnapshot`.
+`GuardLocation`, `Href`, `MetadataContext`, `NavTarget`, `RouteConfig`,
+`RouteMetadata`, `RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
 router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).

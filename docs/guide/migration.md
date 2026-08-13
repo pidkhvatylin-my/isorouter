@@ -22,8 +22,8 @@ a general `metadata` bag that the router carries but never interprets — see
 ```
 
 The `metadata` function receives `MetadataContext` — `params`, `url`,
-`pathname` — a narrower type than `GuardContext` (no `signal` or
-`navigationType`, since it isn't part of the guard pipeline).
+`pathname` — a narrower type than `GuardContext` (no `signal`, `navigationType`,
+or `from`, since it isn't part of the guard pipeline).
 
 ## The one line you must add: `onCommit`
 

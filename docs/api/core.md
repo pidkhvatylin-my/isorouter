@@ -90,12 +90,17 @@ for you on mount/unmount.
 
 ```ts twoslash
 type Awaitable<T> = T | Promise<T>;
+interface GuardLocation {
+  url: URL;
+  params: Record<string, string>;
+}
 interface GuardContext {
   params: Record<string, string>;
   url: URL;
   pathname: string;
   signal: AbortSignal;
   navigationType: "reload" | "push" | "replace" | "traverse";
+  from: GuardLocation | null;
 }
 type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 interface LazyComponent<C> {
@@ -170,13 +175,20 @@ implement the `Register` / `RegisteredRouter` module-augmentation pattern. See
 ```ts twoslash
 type Awaitable<T> = T | Promise<T>;
 // ---cut---
+interface GuardLocation {
+  url: URL;
+  params: Record<string, string>;
+}
+
 interface GuardContext {
   params: Record<string, string>;
   url: URL;
   pathname: string;
+  navigationType: "reload" | "push" | "replace" | "traverse";
+  /** The last committed location, or `null` on the first navigation. */
+  from: GuardLocation | null;
   /** Aborts when this navigation is superseded by a newer one. */
   signal: AbortSignal;
-  navigationType: "reload" | "push" | "replace" | "traverse";
 }
 
 type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
@@ -184,8 +196,9 @@ type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 
 Return nothing/`true` to allow, `false` to block (current URL restored), or a
 same-origin `string` to redirect (`replace`); a cross-origin string throws
-(`status: "error"`) rather than navigating. See
-[Navigation guards](../guide/guards).
+(`status: "error"`) rather than navigating. `from` is the previous **committed**
+location — a blocked, redirected or superseded navigation never becomes anyone's
+`from`. See [Navigation guards](../guide/guards).
 
 ### `RouteMetadata` & `MetadataContext`
 
@@ -212,8 +225,8 @@ declare module "@isorouter/core" {
 }
 ```
 
-`MetadataContext` is a narrower `GuardContext`: no `signal` or
-`navigationType`, since a metadata function isn't part of the guard pipeline.
+`MetadataContext` is a narrower `GuardContext`: no `signal`, `navigationType`,
+or `from`, since a metadata function isn't part of the guard pipeline.
 A function form must be **synchronous and pure** — it's resolved during
 commit, and it is **not called** for a navigation a guard blocks or redirects.
 See [Route metadata](../guide/routing#route-metadata).
@@ -263,8 +276,8 @@ interface RouterOptions {
 
 `createCoreRouter`, `Router`, `matchRoutes`, `lazy`, `isLazy`, and the types
 `AnyRouter`, `Unsubscribe`, `LazyComponent`, `Awaitable`, `BeforeLoad`,
-`ExtractParams`, `GuardContext`, `Href`, `MetadataContext`, `NavTarget`,
-`NavigationKind`, `ResolveRegister`, `RouteConfig`, `RouteMatch`,
+`ExtractParams`, `GuardContext`, `GuardLocation`, `Href`, `MetadataContext`,
+`NavTarget`, `NavigationKind`, `ResolveRegister`, `RouteConfig`, `RouteMatch`,
 `RouteMetadata`, `RouteTemplate`, `RouterOptions`, `RouterSnapshot`.
 
 ## Other targets (TypeScript)
