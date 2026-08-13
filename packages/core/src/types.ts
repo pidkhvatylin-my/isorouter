@@ -27,17 +27,9 @@ export interface GuardLocation {
 }
 
 export interface GuardContext extends MetadataContext {
-  /** Aborts when this navigation is superseded by a newer one. */
-  signal: AbortSignal;
   navigationType: NavigationKind;
-  /**
-   * The last **committed** location, or `null` on the first navigation after a
-   * page load. A blocked, redirected or superseded navigation never becomes
-   * anyone's `from`. This is "where from", not a leave-guard (the moment has
-   * passed — you cannot cancel the exit) and not a history direction
-   * (back/forward can't be derived from two URLs).
-   */
   from: GuardLocation | null;
+  signal: AbortSignal;
 }
 
 /**

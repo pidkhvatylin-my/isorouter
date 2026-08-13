@@ -90,12 +90,6 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
   #commitAbort: AbortController | null = null;
   #started = false;
   #listener = (e: NavigateEvent) => this.#onNavigate(e);
-  /**
-   * Last location the router settled on — the `from` of the next navigation.
-   * Distinct from `#snapshot` because it must survive only *terminal* emits:
-   * a blocked, redirected or superseded navigation returns before reaching one,
-   * so it never becomes anyone's `from`. `null` until the first commit.
-   */
   #committed: GuardLocation | null = null;
 
   constructor(routes: T, options: RouterOptions = {}) {
@@ -271,8 +265,6 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         pathname: url.pathname,
         signal: abortController.signal,
         navigationType,
-        // Read before this navigation settles, so guards see the location the
-        // user is leaving — never the one they're heading to.
         from: this.#committed,
       };
 
