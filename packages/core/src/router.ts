@@ -7,6 +7,7 @@
  * directly into `useSyncExternalStore`, `createSubscriber`, `shallowRef`, etc.
  */
 
+import { buildHref } from "./href";
 import { isLazy, type LazyComponent } from "./lazy";
 import { matchRoutes } from "./matcher";
 
@@ -167,6 +168,22 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
 
   // ─── Imperative Navigation ────────────────────────────────────────────────
 
+  /**
+   * Resolve a `NavTarget` to a concrete href string, through the single
+   * `buildHref` resolver. Pure — no navigation happens, nothing is read from
+   * router state. `navigate()` sits ON this method rather than beside it, so
+   * a link built with `href()` and a call to `navigate()` can never resolve
+   * to different URLs.
+   *
+   * The return type is `string`, not `Href<T>`: a runtime-built href (params
+   * substituted, search/hash appended) can't be proven to be a member of the
+   * statically-known `Href<T>` union, and claiming otherwise would be a lie
+   * the type checker can't catch.
+   */
+  href(to: NavTarget<T>): string {
+    return buildHref(to);
+  }
+
   navigate(
     to: NavTarget<T>,
     opts: { replace?: boolean; state?: unknown } = {},
@@ -176,7 +193,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         "[isorouter] Navigation API unavailable — load a polyfill",
       );
 
-    return this.#navigateRaw(to, opts.replace ?? false, opts.state);
+    return this.#navigateRaw(this.href(to), opts.replace ?? false, opts.state);
   }
 
   back(): void {

@@ -173,11 +173,37 @@ export type Href<T extends readonly RouteConfig<any>[]> = ToHref<
   RouteTemplate<T>
 >;
 
-/** A valid navigation target: a known path, optionally with `?query` or `#hash`. */
+/**
+ * The object form of a `NavTarget`: a route template plus the pieces
+ * `buildHref` needs to fill it in. Resolved by `Router#href` /
+ * `Router#navigate` through the single `buildHref` resolver.
+ *
+ * `params` is intentionally loose (`Record<string, string>`) rather than
+ * keyed off `ExtractParams<To>` — tying it to the specific template would
+ * require a conditional type over every member of the `to` union, which is
+ * the kind of thing that quietly tanks editor/tsc performance on a large
+ * route tree. // follow-up: revisit stricter per-template params if it can
+ * be done cheaply.
+ */
+export interface NavTargetObject<T extends readonly RouteConfig<any>[]> {
+  to: RouteTemplate<T>;
+  params?: Record<string, string>;
+  search?: string;
+  hash?: string;
+}
+
+/**
+ * A valid navigation target: a known path, optionally with `?query` or
+ * `#hash`, or the equivalent object form (`{ to, params, search, hash }`).
+ * The string members are the historical, back-compat surface; the object
+ * form exists so params/search/hash can be composed without hand-building a
+ * string.
+ */
 export type NavTarget<T extends readonly RouteConfig<any>[]> =
   | Href<T>
   | `${Href<T>}?${string}`
-  | `${Href<T>}#${string}`;
+  | `${Href<T>}#${string}`
+  | NavTargetObject<T>;
 
 /**
  * Resolves a `Register` interface to its `router` type when augmented,

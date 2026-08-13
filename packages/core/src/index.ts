@@ -8,6 +8,7 @@ export {
 } from "./router";
 export { matchRoutes } from "./matcher";
 export { lazy, isLazy, type LazyComponent } from "./lazy";
+export { buildHref, type HrefTarget } from "./href";
 export type {
   Awaitable,
   BeforeLoad,
@@ -17,6 +18,7 @@ export type {
   Href,
   MetadataContext,
   NavTarget,
+  NavTargetObject,
   NavigationKind,
   ResolveRegister,
   RouteConfig,
