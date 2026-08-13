@@ -12,9 +12,11 @@ import { matchRoutes } from "./matcher";
 
 import type {
   GuardContext,
+  MetadataContext,
   NavTarget,
   NavigationKind,
   RouteConfig,
+  RouteMetadata,
   RouterOptions,
   RouterSnapshot,
 } from "./types";
@@ -25,6 +27,7 @@ export type Unsubscribe = () => void;
 
 const NOOP = () => undefined;
 const SAFE_ORIGIN = "http://localhost/";
+const EMPTY_METADATA: RouteMetadata = Object.freeze({});
 
 function initialUrl(): URL {
   return new URL(typeof location !== "undefined" ? location.href : SAFE_ORIGIN);
@@ -34,6 +37,26 @@ function normalizePath(p: string): string {
   let end = p.length;
   while (end > 0 && p.charCodeAt(end - 1) === 47 /* "/" */) end--;
   return end === 0 ? "/" : p.slice(0, end);
+}
+
+/** Shallow-merges `metadata` root → leaf; deeper routes win. */
+function mergeMetadata<C>(
+  chain: readonly RouteConfig<C>[],
+  ctx: MetadataContext,
+): RouteMetadata {
+  let merged: RouteMetadata | null = null;
+
+  for (const route of chain) {
+    const metadata = route.metadata;
+
+    if (metadata == null) continue;
+
+    const resolved = typeof metadata === "function" ? metadata(ctx) : metadata;
+
+    merged = merged ? Object.assign(merged, resolved) : { ...resolved };
+  }
+
+  return merged ?? EMPTY_METADATA;
 }
 
 /**
@@ -76,6 +99,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       url: initialUrl(),
       status: "idle",
       error: null,
+      metadata: EMPTY_METADATA,
     };
   }
 
@@ -96,6 +120,18 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     this.#snapshot = { ...this.#snapshot, ...patch };
 
     for (const fn of this.#subs) fn(this.#snapshot);
+  }
+
+  /**
+   * Publishes a *terminal* snapshot — one the router settles on — and notifies
+   * `onCommit`. Every exit from `#commit` that lands on a URL goes through
+   * here, including not-found and error: the app owns `document.title` now, so
+   * a 404 landing has to reach it too. Blocked, redirected and superseded
+   * navigations return earlier and never settle.
+   */
+  #settle(patch: Partial<RouterSnapshot<C>>): void {
+    this.#emit(patch);
+    this.#options.onCommit?.(this.#snapshot);
   }
 
   // ─── Lifecycle ────────────────────────────────────────────────────────────
@@ -201,12 +237,13 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       const matched = matchRoutes(this.routes, url.pathname);
 
       if (!matched) {
-        this.#emit({
+        this.#settle({
           components: [],
           params: {},
           url,
           status: "not-found",
           error: null,
+          metadata: EMPTY_METADATA,
         });
         return;
       }
@@ -252,25 +289,24 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       const components = await this.#resolve(matched.chain);
       if (abortController.signal.aborted) return;
 
-      this.#emit({
+      this.#settle({
         components,
         params: matched.params,
         url,
         status: "idle",
         error: null,
+        metadata: mergeMetadata(matched.chain, ctx),
       });
-
-      this.#applyTitle(matched.chain, ctx);
-      this.#options.onCommit?.(this.#snapshot);
     } catch (err) {
       if (abortController.signal.aborted) return;
 
-      this.#emit({
+      this.#settle({
         components: [],
         params: {},
         url,
         status: "error",
         error: err,
+        metadata: EMPTY_METADATA,
       });
       this.#options.onError?.(err);
     }
@@ -293,20 +329,6 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         return comp.resolved;
       }),
     );
-  }
-
-  #applyTitle(chain: RouteConfig<C>[], ctx: GuardContext): void {
-    if (typeof document === "undefined") return;
-
-    for (let i = chain.length - 1; i >= 0; i--) {
-      const t = chain[i]!.title;
-
-      if (t == null) continue;
-
-      document.title = typeof t === "function" ? t(ctx) : t;
-
-      return;
-    }
   }
 }
 

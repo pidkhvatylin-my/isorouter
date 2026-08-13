@@ -52,8 +52,8 @@ export const router = createRouter([
     path: "/",
     component: AppLayout,
     children: [
-      { index: true, title: "Home", component: Home },
-      { path: "about", title: "About", component: About },
+      { index: true, metadata: { title: "Home" }, component: Home },
+      { path: "about", metadata: { title: "About" }, component: About },
       {
         path: "dashboard",
         component: DashboardLayout,
@@ -177,15 +177,32 @@ Reads the `SvelteRouter` instance from context. Must be used within `<Router>`
 once nothing reads it. `router.navigate`, `router.back`, `router.forward` and
 `router.isActive` are also available on the instance.
 
-## Route `title`
+## Route metadata
 
-Routes accept an optional `title` — a string or a function:
+Routes accept an optional `metadata` — a plain object or a function — merged
+root → leaf across the matched chain. The core carries it but never acts on
+it:
 
 ```ts
-{ path: "about", title: "About", component: About }
+{ path: "about", metadata: { title: "About" }, component: About }
 
-// Dynamic — receives GuardContext with params, url, signal
-{ path: "users/:id", title: (ctx) => `User #${ctx.params.id}`, component: User }
+// Dynamic — receives MetadataContext with params, url, pathname
+{
+  path: "users/:id",
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
+  component: User,
+}
+```
+
+Nothing writes `document.title` for you anymore — wire it up via `onCommit`:
+
+```ts
+const router = createRouter(routes, {
+  onCommit: (snapshot) => {
+    if (typeof snapshot.metadata.title === "string")
+      document.title = snapshot.metadata.title;
+  },
+});
 ```
 
 ## Type-safe navigation

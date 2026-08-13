@@ -97,6 +97,7 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  metadata: RouteMetadata;
 }
 ```
 
@@ -116,7 +117,7 @@ interface RouteConfig<C = unknown> {
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  title?: string | ((ctx: GuardContext) => string);
+  metadata?: RouteMetadata | ((ctx: MetadataContext) => RouteMetadata);
   children?: readonly RouteConfig<C>[];
 }
 ```
@@ -132,8 +133,30 @@ interface RouteConfig<C = unknown> {
   pass-through layouts) but contribute nothing to `snapshot.components`.
 - **`children`** — nested routes. A matched parent with no matching child
   still resolves on its own if the path is fully consumed.
-- **`title`** — sets `document.title` on commit. The deepest route in the
-  matched chain that defines a `title` wins.
+- **`metadata`** — arbitrary per-route data, merged root → leaf across the
+  matched chain (deeper routes override keys). The core carries it but never
+  acts on it — nothing writes `document.title` for you anymore; wire that up
+  yourself via `onCommit`:
+
+  ```ts
+  const router = createCoreRouter(routes, {
+    onCommit: (snapshot) => {
+      if (typeof snapshot.metadata.title === "string")
+        document.title = snapshot.metadata.title;
+    },
+  });
+  ```
+
+  `RouteMetadata` is empty by design — augment it via declaration merging to
+  type the keys you use:
+
+  ```ts
+  declare module "@isorouter/core" {
+    interface RouteMetadata {
+      title?: string;
+    }
+  }
+  ```
 
 ## Guards
 
@@ -221,6 +244,10 @@ interface RouterOptions {
   onCommit?: (snapshot: RouterSnapshot<unknown>) => void;
 }
 ```
+
+`onCommit` fires for every snapshot the router settles on — `not-found` and
+`error` landings included, so a 404 can retitle the document. Navigations a
+guard blocks or redirects never settle, so they never fire it.
 
 ## License
 

@@ -101,7 +101,10 @@ export default defineConfig({
         },
         {
           text: "Help",
-          items: [{ text: "FAQ", link: "/guide/faq" }],
+          items: [
+            { text: "FAQ", link: "/guide/faq" },
+            { text: "Migrating from v1", link: "/guide/migration" },
+          ],
         },
       ],
       "/frameworks/": [

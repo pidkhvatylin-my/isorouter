@@ -13,7 +13,11 @@ import RedirectTarget from "./pages/RedirectTarget.svelte";
 import Settings from "./pages/Settings.svelte";
 import Slow from "./pages/Slow.svelte";
 
-import type { GuardContext, RouteConfig } from "../../src/index";
+import type {
+  GuardContext,
+  MetadataContext,
+  RouteConfig,
+} from "../../src/index";
 import type { SvelteComponentType } from "../../src/index";
 
 declare global {
@@ -25,24 +29,26 @@ declare global {
 window.__slowLog = [];
 
 const routes = [
-  { path: "/", component: Home, title: "Home" },
-  { path: "about", component: About, title: "About" },
+  { path: "/", component: Home, metadata: { title: "Home" } },
+  { path: "about", component: About, metadata: { title: "About" } },
   {
     path: "concerts/:city",
     component: Concerts,
-    title: (ctx: GuardContext) => `Concerts in ${ctx.params.city}`,
+    metadata: (ctx: MetadataContext) => ({
+      title: `Concerts in ${ctx.params.city}`,
+    }),
   },
   { path: "users/:id", component: lazy(() => import("./pages/User.svelte")) },
   {
     path: "dashboard",
     component: DashboardLayout,
-    title: "Dashboard",
+    metadata: { title: "Dashboard" },
     children: [
       { index: true, component: Overview },
       {
         path: "settings",
         component: Settings,
-        title: "Dashboard - Settings",
+        metadata: { title: "Dashboard - Settings" },
       },
     ],
   },
@@ -61,7 +67,13 @@ const routes = [
   },
 ] as const satisfies readonly RouteConfig<SvelteComponentType>[];
 
-export const router = createRouter(routes);
+export const router = createRouter(routes, {
+  // Nothing in the core writes document.title anymore — apps that want it
+  // opt in via metadata + onCommit.
+  onCommit: (s) => {
+    if (typeof s.metadata.title === "string") document.title = s.metadata.title;
+  },
+});
 
 mount(App, {
   target: document.getElementById("app")!,

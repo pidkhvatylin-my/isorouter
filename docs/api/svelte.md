@@ -22,8 +22,8 @@ npm install @isorouter/svelte
 ## Types
 
 `AnySvelteRouter`, `SvelteComponentType`, `Register`, `RegisteredRouter`, plus
-the core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`,
-`RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+the core re-exports `BeforeLoad`, `GuardContext`, `Href`, `MetadataContext`,
+`NavTarget`, `RouteConfig`, `RouteMetadata`, `RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `getRouter()` to the concrete router type — see
 [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).

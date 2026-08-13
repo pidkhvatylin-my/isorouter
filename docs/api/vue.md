@@ -19,14 +19,15 @@ npm install @isorouter/vue
 | `useRouterState`  | composable  | `ShallowRef<RouterSnapshot>`; fresh reference on every commit.        |
 | `useParams`       | composable  | `ComputedRef<Record<string, string>>`.                               |
 | `useLocation`     | composable  | `ComputedRef<URL>`.                                                   |
+| `useMetadata`     | composable  | `ComputedRef<RouteMetadata>`.                                         |
 | `useNavigate`     | composable  | `(to, opts?) => void` delegating to `router.navigate`.               |
 | `lazy`            | function    | Re-exported from `@isorouter/core`.                                   |
 
 ## Types
 
 `AnyVueRouter`, `VueComponentType`, `Register`, `RegisteredRouter`, plus the
-core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`, `RouteConfig`,
-`RouterOptions`, `RouterSnapshot`.
+core re-exports `BeforeLoad`, `GuardContext`, `Href`, `MetadataContext`,
+`NavTarget`, `RouteConfig`, `RouteMetadata`, `RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
 router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).
