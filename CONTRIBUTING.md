@@ -59,6 +59,36 @@ the generated file in `.changeset/` along with your change.
 Internal-only changes (docs, CI, tests, tooling, `@isorouter/test-utils`)
 don't need a changeset.
 
+## Branches & releases
+
+`master` is the stable 1.x line. Its CI `release` job opens/updates a
+"Version Packages" PR from pending changesets and, once that's merged,
+publishes automatically to the `latest` dist-tag.
+
+`2.x` is the next-major integration branch. It's kept in changesets
+[pre mode](https://github.com/changesets/changesets/blob/main/docs/prereleases.md)
+(`.changeset/pre.json`), so any changeset added there versions as
+`2.0.0-alpha.N` instead of a stable release.
+
+Alpha prereleases are cut by hand from `2.x` — they are not auto-published
+by CI:
+
+```sh
+git switch 2.x
+npx changeset            # add changeset(s); use "major" for all four public packages
+npx changeset version    # bumps to 2.0.0-alpha.N and updates CHANGELOGs
+npm run build
+npx changeset publish    # respects pre.json → publishes to the `alpha` dist-tag
+git push --follow-tags
+```
+
+Always publish with `changeset publish`, which honors pre mode — never a
+bare `npm publish`, which would target `latest`. Manual publishes like this
+have no npm provenance, which is acceptable for alphas.
+
+Install an alpha explicitly with `npm i @isorouter/core@alpha`; a plain
+`npm i` still resolves stable 1.x from `latest`.
+
 ## Pull requests
 
 - Keep PRs focused — one logical change per PR.
