@@ -33,10 +33,36 @@ export interface RouteConfig<C = unknown> {
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  /** Sets document.title on commit. Deepest title in the chain wins. */
-  title?: string | ((ctx: GuardContext) => string);
+  /** Static or computed metadata; shallow-merged root → leaf (child wins). */
+  metadata?: RouteMetadataInput;
   children?: readonly RouteConfig<C>[];
 }
+
+/**
+ * Per-route metadata — carried and merged by the router, never interpreted by it.
+ * Empty by design: declare your own schema via module augmentation (always
+ * against `@isorouter/core`, even when using an adapter):
+ *
+ *   declare module "@isorouter/core" {
+ *     interface RouteMetadata {
+ *       title?: string;
+ *       description?: string;
+ *     }
+ *   }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface RouteMetadata {}
+
+/** Context for a metadata function. Narrower than `GuardContext` by design. */
+export interface MetadataContext {
+  params: Record<string, string>;
+  url: URL;
+  pathname: string;
+}
+
+export type RouteMetadataInput =
+  | RouteMetadata
+  | ((ctx: MetadataContext) => RouteMetadata);
 
 /** Scroll handling after a committed navigation, forwarded to `intercept`. */
 export type ScrollMode = "after-transition" | "manual";
@@ -57,6 +83,7 @@ export interface RouterSnapshot<C> {
   url: URL;
   status: RouterStatus;
   error: unknown;
+  metadata: RouteMetadata;
 }
 
 export interface RouteMatch<C = unknown> {

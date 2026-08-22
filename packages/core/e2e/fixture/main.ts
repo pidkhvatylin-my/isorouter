@@ -1,7 +1,17 @@
 import { applyPolyfill } from "@virtualstate/navigation/apply-polyfill";
 import { createCoreRouter, lazy } from "../../src/index";
-import type { GuardContext, RouterSnapshot } from "../../src/types";
+import type {
+  GuardContext,
+  MetadataContext,
+  RouterSnapshot,
+} from "../../src/types";
 import type { PageComponent } from "./types";
+
+declare module "../../src/types" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
 
 declare global {
   interface Window {
@@ -36,21 +46,27 @@ const Slow: PageComponent = ({ params }) =>
   `<p data-testid="page">slow:${params.id}</p>`;
 
 const routes = [
-  { path: "/", component: Home, title: "Home" },
-  { path: "about", component: About, title: "About" },
+  { path: "/", component: Home, metadata: { title: "Home" } },
+  { path: "about", component: About, metadata: { title: "About" } },
   {
     path: "concerts/:city",
     component: Concerts,
-    title: (ctx: GuardContext) => `Concerts in ${ctx.params.city}`,
+    metadata: (ctx: MetadataContext) => ({
+      title: `Concerts in ${ctx.params.city}`,
+    }),
   },
   { path: "users/:id", component: lazy(() => import("./pages/user")) },
   {
     path: "dashboard",
     component: DashboardLayout,
-    title: "Dashboard",
+    metadata: { title: "Dashboard" },
     children: [
       { index: true, component: Overview },
-      { path: "settings", component: Settings, title: "Dashboard - Settings" },
+      {
+        path: "settings",
+        component: Settings,
+        metadata: { title: "Dashboard - Settings" },
+      },
     ],
   },
   { path: "files/*", component: Files },
@@ -91,7 +107,11 @@ function render(snapshot: RouterSnapshot<PageComponent>): void {
   app.innerHTML = html;
 }
 
-export const router = createCoreRouter<typeof routes, PageComponent>(routes);
+export const router = createCoreRouter<typeof routes, PageComponent>(routes, {
+  onCommit: (s) => {
+    if (s.metadata.title) document.title = s.metadata.title;
+  },
+});
 router.subscribe(render);
 render(router.getSnapshot());
 

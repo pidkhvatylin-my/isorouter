@@ -8,8 +8,14 @@ import Settings from "../fixtures/Settings.svelte";
 import type { SvelteComponentType } from "../../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
 export const routes = [
-  { path: "/", component: Home, title: "Home" },
+  { path: "/", component: Home, metadata: { title: "Home" } },
   { path: "about", component: About },
   { path: "concerts/:city", component: Concerts },
   {
