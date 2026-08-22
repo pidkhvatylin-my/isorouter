@@ -154,9 +154,27 @@ const router = createCoreRouter([{ path: "/", component: Home }] as const, {
 });
 ```
 
-### A framework effect
+### The framework's own head API
 
-React:
+Where a framework has a built-in head mechanism, prefer it over an effect —
+it's declarative and scoped to the component, set up and torn down with it,
+instead of manually writing to `document` and having to undo it.
+
+React 19 hoists `<title>`/`<meta>`/`<link>` rendered anywhere in the tree
+into `<head>` automatically:
+
+```tsx
+import { useMetadata } from "@isorouter/react";
+
+function Head() {
+  const metadata = useMetadata();
+
+  return <title>{metadata.title ?? "My app"}</title>;
+}
+```
+
+On React 18 (the adapter's peer range is `react >=18`) there's no hoisting,
+so fall back to a `useEffect` writing `document.title` directly:
 
 ```tsx
 import { useEffect } from "react";
@@ -171,7 +189,7 @@ function TitleEffect() {
 }
 ```
 
-Vue:
+Vue 3 has no built-in head API. `watchEffect` is the dependency-free option:
 
 ```vue
 <script setup lang="ts">
@@ -185,18 +203,21 @@ watchEffect(() => {
 </script>
 ```
 
-Svelte:
+For `<meta>` / `<link>` tags, dedupe rules, or anything beyond a plain
+title, reach for `useHead()` from `@unhead/vue` or `@vueuse/head` instead.
+
+Svelte has `<svelte:head>` — declarative, no `$effect`, no `document`:
 
 ```svelte
 <script lang="ts">
   import { getRouter } from "@isorouter/svelte";
 
   const router = getRouter();
-
-  $effect(() => {
-    if (router.metadata.title) document.title = router.metadata.title;
-  });
 </script>
+
+<svelte:head>
+  <title>{router.metadata.title ?? "My app"}</title>
+</svelte:head>
 ```
 
 ### Feeding a head library

@@ -221,7 +221,8 @@ from URL params:
 `RouteMetadata` is empty by default — the `declare module` augmentation above
 is required before `snapshot.metadata.title` (or `useMetadata().value.title`)
 type-checks, and it must always target `"@isorouter/core"`, never
-`"@isorouter/vue"`. Read it with `useMetadata()`:
+`"@isorouter/vue"`. Vue 3 has no built-in head API — read it with
+`useMetadata()` and apply it with `watchEffect`, the dependency-free option:
 
 ```vue
 <script setup lang="ts">
@@ -234,6 +235,9 @@ watchEffect(() => {
 });
 </script>
 ```
+
+For `<meta>` / `<link>` tags, dedupe rules, or anything beyond a plain
+title, reach for `useHead()` from `@unhead/vue` or `@vueuse/head` instead.
 
 isorouter never touches `document` itself — see [Metadata &
 SEO](../guide/metadata) for the merge rule and more recipes, including the

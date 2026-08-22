@@ -157,6 +157,9 @@ const router = createRouter([
 ] as const);
 ```
 
+Vue 3 has no built-in head API — apply it with `watchEffect`, the
+dependency-free option:
+
 ```vue
 <script setup lang="ts">
 import { watchEffect } from "vue";
@@ -168,6 +171,9 @@ watchEffect(() => {
 });
 </script>
 ```
+
+For `<meta>` / `<link>` tags, dedupe rules, or anything beyond a plain
+title, reach for `useHead()` from `@unhead/vue` or `@vueuse/head` instead.
 
 isorouter never touches `document` itself — see the
 [Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)

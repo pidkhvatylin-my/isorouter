@@ -149,19 +149,21 @@ from URL params:
 `RouteMetadata` is empty by default — the `declare module` augmentation above
 is required before `snapshot.metadata.title` (or `useMetadata().title`)
 type-checks, and it must always target `"@isorouter/core"`, never
-`"@isorouter/react"`. Read it with `useMetadata()`:
+`"@isorouter/react"`. Read it with `useMetadata()`. React 19 hoists a
+`<title>` rendered anywhere in the tree into `<head>`:
 
 ```tsx
 import { useMetadata } from "@isorouter/react";
 
-function DocumentTitle() {
+function Head() {
   const metadata = useMetadata();
-  useEffect(() => {
-    if (metadata.title) document.title = metadata.title;
-  }, [metadata.title]);
-  return null;
+
+  return <title>{metadata.title ?? "My app"}</title>;
 }
 ```
+
+On React 18 there's no hoisting — fall back to a `useEffect` writing
+`document.title` directly.
 
 isorouter never touches `document` itself — see [Metadata &
 SEO](../guide/metadata) for the merge rule and more recipes, including the

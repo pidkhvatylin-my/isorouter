@@ -222,18 +222,19 @@ from URL params:
 `RouteMetadata` is empty by default — the `declare module` augmentation above
 is required before `router.metadata.title` type-checks, and it must always
 target `"@isorouter/core"`, never `"@isorouter/svelte"`. Read it with the
-`metadata` getter on the router returned by [`getRouter()`](#getrouter):
+`metadata` getter on the router returned by [`getRouter()`](#getrouter), and
+apply it via the built-in `<svelte:head>`:
 
 ```svelte
 <script lang="ts">
   import { getRouter } from "@isorouter/svelte";
 
   const router = getRouter();
-
-  $effect(() => {
-    if (router.metadata.title) document.title = router.metadata.title;
-  });
 </script>
+
+<svelte:head>
+  <title>{router.metadata.title ?? "My app"}</title>
+</svelte:head>
 ```
 
 isorouter never touches `document` itself — see [Metadata &

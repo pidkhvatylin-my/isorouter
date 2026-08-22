@@ -146,14 +146,16 @@ const router = createRouter([
   { path: "about", metadata: { title: "About" }, component: About },
 ] as const);
 
-function DocumentTitle() {
+function Head() {
   const metadata = useMetadata();
-  useEffect(() => {
-    if (metadata.title) document.title = metadata.title;
-  }, [metadata.title]);
-  return null;
+
+  return <title>{metadata.title ?? "My app"}</title>;
 }
 ```
+
+React 19 hoists a `<title>` rendered anywhere in the tree into `<head>`. On
+React 18 there's no hoisting — fall back to a `useEffect` writing
+`document.title` directly.
 
 isorouter never touches `document` itself — see the
 [Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
