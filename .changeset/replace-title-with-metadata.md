@@ -74,5 +74,5 @@ the parent instead of fully replacing it — set every key explicitly on the
 leaf route if you need the old behaviour for a given field.
 
 See the [Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
-for the full merge rule and more recipes (a framework effect, feeding a head
-library).
+for the full merge rule and more recipes (your framework's own head API,
+feeding a head library).
