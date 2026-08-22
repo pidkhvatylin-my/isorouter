@@ -99,8 +99,8 @@ jobs:
       - name: Create Release Pull Request or publish to npm
         uses: changesets/action@v2
         with:
-          version: npm run version
-          publish: npm run release
+          version-script: npm run version
+          publish-script: npm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
