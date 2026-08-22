@@ -97,7 +97,7 @@ jobs:
         run: npm ci
 
       - name: Create Release Pull Request or publish to npm
-        uses: changesets/action@v2
+        uses: changesets/action@v1
         with:
           version: npm run version
           publish: npm run release
