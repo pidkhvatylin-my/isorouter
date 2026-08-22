@@ -57,11 +57,11 @@ Run from repo root with `-w @isorouter/<pkg>`, or from inside the package direct
 ## Conventions & release
 
 - Changesets-driven releases with a per-package CHANGELOG. Run `npx changeset` for any change to published behavior of core/react/svelte/vue. Internal-only changes (docs/CI/tests/tooling/test-utils) skip the changeset.
-- Branch model: `master` (the current 1.x line) and `2.x` (next-major development). **Publish only from master.** Prereleases are done by hand.
+- Branch model: `master` (stable 1.x line — CI publishes stable releases to the `latest` dist-tag) and `2.x` (next-major development). Alpha prereleases are published **by hand from `2.x`**.
 - Security fixes: ship via changeset + lockstep version bump; a GHSA/CVE is optional, not the default.
 - **Never add `Co-Authored-By` / Claude co-author lines to commit messages** — explicit project preference.
 - CI (`.github/workflows/ci.yml`) runs on **Node 24**: build → check → unit tests → e2e (native + polyfill). A `release` job (only on `master`) opens/updates a "Version Packages" PR from pending changesets and publishes to npm on merge (needs an `NPM_TOKEN` secret); the private `@isorouter/test-utils` is skipped automatically.
-- All four public packages set `publishConfig.tag = "alpha"` so an accidental `npm publish` cannot move the `latest` dist-tag — **revisit this before cutting stable 2.0.0** (drop it at `changeset pre exit`, or ensure `changeset publish` passes `--tag latest`).
+- Alpha prereleases are fenced to the `alpha` dist-tag by changesets **pre mode** (`.changeset/pre.json`), which `changeset publish` honors — packages do **not** carry a permanent `publishConfig.tag` (that would misroute stable `master` publishes to `alpha`). Publish alphas by hand from `2.x` with `changeset publish` (not a bare `npm publish`, which would target `latest`); `master` keeps publishing stable to `latest` via CI.
 - The docs site is VitePress (`npm run docs:dev` / `docs:build`), deployed via `.github/workflows/docs.yml`.
 
 ## Design non-goals (do not propose these)
