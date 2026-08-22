@@ -5,6 +5,7 @@ import { Router } from "@isorouter/core";
 import type {
   NavTarget,
   RouteConfig,
+  RouteMetadata,
   RouterOptions,
   RouterSnapshot,
 } from "@isorouter/core";
@@ -32,6 +33,10 @@ export class SvelteRouter<
   get current(): RouterSnapshot<SvelteComponentType> {
     this.#track();
     return this.#core.getSnapshot();
+  }
+
+  get metadata(): RouteMetadata {
+    return this.current.metadata;
   }
 
   navigate(to: NavTarget<T>, opts?: { replace?: boolean; state?: unknown }) {

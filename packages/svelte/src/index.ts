@@ -3,8 +3,11 @@ export type {
   BeforeLoad,
   GuardContext,
   Href,
+  MetadataContext,
   NavTarget,
   RouteConfig,
+  RouteMetadata,
+  RouteMetadataInput,
   RouterOptions,
   RouterSnapshot,
 } from "@isorouter/core";

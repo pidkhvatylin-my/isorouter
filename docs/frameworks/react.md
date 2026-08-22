@@ -104,6 +104,7 @@ All hooks must be used within `<Router>`.
 | `useParams<P>()`     | `snapshot.params`, typed as `P`.                                               |
 | `useLocation()`      | `snapshot.url`.                                                                |
 | `useNavigate()`      | a referentially-stable `(to, opts?) => void` bound to `router.navigate`.       |
+| `useMetadata()`      | `snapshot.metadata`, re-rendering on every commit.                              |
 
 ```tsx
 import { useParams, useNavigate } from "@isorouter/react";
@@ -118,24 +119,53 @@ function User() {
 `useNavigate()` is referentially stable, so it's safe in `useEffect` dependency
 arrays and `useCallback` bodies without re-subscribing.
 
-## Route `title`
+## Route metadata
 
-A route can declare a `title` to identify itself:
+A route can declare `metadata` — an arbitrary bag, shallow-merged root → leaf
+over the matched chain, that the router carries but never interprets:
 
 ```ts
-{ path: "about", title: "About", component: About }
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
+{ path: "about", metadata: { title: "About" }, component: About }
 ```
 
-`title` can also be a function that receives [`GuardContext`](../api/react#types)
-and runs before the component renders — useful for dynamic titles from URL params:
+`metadata` can also be a synchronous function of
+[`MetadataContext`](../api/core#metadata-types) — useful for dynamic titles
+from URL params:
 
 ```ts
 {
   path: "users/:id",
-  title: (ctx) => `User #${ctx.params.id}`,
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
   component: lazy(() => import("./User")),
 }
 ```
+
+`RouteMetadata` is empty by default — the `declare module` augmentation above
+is required before `snapshot.metadata.title` (or `useMetadata().title`)
+type-checks, and it must always target `"@isorouter/core"`, never
+`"@isorouter/react"`. Read it with `useMetadata()`:
+
+```tsx
+import { useMetadata } from "@isorouter/react";
+
+function DocumentTitle() {
+  const metadata = useMetadata();
+  useEffect(() => {
+    if (metadata.title) document.title = metadata.title;
+  }, [metadata.title]);
+  return null;
+}
+```
+
+isorouter never touches `document` itself — see [Metadata &
+SEO](../guide/metadata) for the merge rule and more recipes, including the
+simpler `onCommit` option.
 
 ## Module augmentation
 

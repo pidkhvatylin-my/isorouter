@@ -101,13 +101,23 @@ type BeforeLoad = (ctx: GuardContext) => Awaitable<void | boolean | string>;
 interface LazyComponent<C> {
   (): Promise<{ default: C }>;
 }
+interface MetadataContext {
+  params: Record<string, string>;
+  url: URL;
+  pathname: string;
+}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface RouteMetadata {}
+type RouteMetadataInput =
+  | RouteMetadata
+  | ((ctx: MetadataContext) => RouteMetadata);
 // ---cut---
 interface RouteConfig<C = unknown> {
   path?: string;
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  title?: string | ((ctx: GuardContext) => string);
+  metadata?: RouteMetadataInput;
   children?: readonly RouteConfig<C>[];
 }
 ```
@@ -122,12 +132,58 @@ interface RouteConfig<C = unknown> {
   to `snapshot.components`.
 - **`children`** — nested routes. A matched parent with no matching child still
   resolves on its own if the path is fully consumed.
-- **`title`** — sets `document.title` on commit. The **deepest** route in the
-  matched chain that defines a `title` wins.
+- **`metadata`** — a value, or a synchronous function of `MetadataContext`.
+  **Shallow-merged root → leaf** over the matched chain (child keys override
+  parent keys) into `snapshot.metadata`. The router carries and merges this
+  bag but never interprets it — see [Metadata & SEO](../guide/metadata).
+
+### Metadata types
+
+```ts twoslash
+// ---cut---
+/**
+ * Per-route metadata — carried and merged by the router, never interpreted by
+ * it. Empty by design: declare your own schema via module augmentation,
+ * always against `@isorouter/core` (even when using an adapter):
+ *
+ *   declare module "@isorouter/core" {
+ *     interface RouteMetadata {
+ *       title?: string;
+ *       description?: string;
+ *     }
+ *   }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface RouteMetadata {}
+
+/** Context for a metadata function. Narrower than `GuardContext` by design —
+ * no `signal`, no `navigationType`: metadata functions must be synchronous. */
+interface MetadataContext {
+  params: Record<string, string>;
+  url: URL;
+  pathname: string;
+}
+
+type RouteMetadataInput =
+  | RouteMetadata
+  | ((ctx: MetadataContext) => RouteMetadata);
+```
+
+`RouteMetadata` is an **empty declaration-merging interface** — nothing is
+privileged by core, not even `title`. An object literal still assigns to `{}`
+without error, so the forcing function is the **read** side:
+`snapshot.metadata.title` is a compile error until you augment the interface.
+Metadata functions must be **synchronous and pure**; they're evaluated just
+before the final commit emit, so they never run for blocked, redirected or
+aborted navigations. See [Metadata & SEO](../guide/metadata) for the full
+picture and migration recipes.
 
 ### `RouterSnapshot`
 
 ```ts twoslash
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface RouteMetadata {}
+// ---cut---
 interface RouterSnapshot<C> {
   /** Matched chain's components, root → leaf (routes with no component removed). */
   components: C[];
@@ -135,6 +191,8 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  /** Shallow-merged metadata from the matched chain, root → leaf. */
+  metadata: RouteMetadata;
 }
 ```
 
@@ -194,12 +252,15 @@ for subsequent navigations. `isLazy(value)` narrows a value to a
 ## Options
 
 ```ts twoslash
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface RouteMetadata {}
 interface RouterSnapshot<C> {
   components: C[];
   params: Record<string, string>;
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  metadata: RouteMetadata;
 }
 // ---cut---
 interface RouterOptions {
@@ -212,15 +273,17 @@ interface RouterOptions {
 - **`scroll`** — `"after-transition"` (default) restores/resets scroll once the
   commit settles; `"manual"` leaves scroll to you.
 - **`onError`** — called with any error thrown during a guard or lazy import.
-- **`onCommit`** — called with each committed snapshot.
+- **`onCommit`** — called with each committed snapshot. Since the core never
+  touches `document`, `onCommit` is also the primary place to apply
+  `snapshot.metadata` — see [Metadata & SEO](../guide/metadata).
 
 ## Exports
 
 `createCoreRouter`, `Router`, `matchRoutes`, `lazy`, `isLazy`, and the types
 `AnyRouter`, `Unsubscribe`, `LazyComponent`, `Awaitable`, `BeforeLoad`,
-`ExtractParams`, `GuardContext`, `Href`, `NavTarget`, `NavigationKind`,
-`ResolveRegister`, `RouteConfig`, `RouteMatch`, `RouteTemplate`, `RouterOptions`,
-`RouterSnapshot`.
+`ExtractParams`, `GuardContext`, `Href`, `MetadataContext`, `NavTarget`,
+`NavigationKind`, `ResolveRegister`, `RouteConfig`, `RouteMatch`, `RouteMetadata`,
+`RouteMetadataInput`, `RouteTemplate`, `RouterOptions`, `RouterSnapshot`.
 
 ## Other targets (TypeScript)
 

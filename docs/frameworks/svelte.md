@@ -35,13 +35,20 @@ import DashboardLayout from "./DashboardLayout.svelte";
 import Overview from "./Overview.svelte";
 import Settings from "./Settings.svelte";
 
+// Metadata schema — always augmented against "@isorouter/core", even here
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
 export const router = createRouter([
   {
     path: "/",
     component: AppLayout,
     children: [
-      { index: true, title: "Home", component: Home },
-      { path: "about", title: "About", component: About },
+      { index: true, metadata: { title: "Home" }, component: Home },
+      { path: "about", metadata: { title: "About" }, component: About },
       {
         path: "dashboard",
         component: DashboardLayout,
@@ -185,24 +192,53 @@ template to subscribe to commits; the subscription is dropped once nothing reads
 it. `router.navigate`, `router.back`, `router.forward` and `router.isActive` are
 also available on the instance.
 
-## Route `title`
+## Route metadata
 
-A route can declare a `title` to identify itself:
+A route can declare `metadata` — an arbitrary bag, shallow-merged root → leaf
+over the matched chain, that the router carries but never interprets:
 
 ```ts
-{ path: "about", title: "About", component: About }
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
+{ path: "about", metadata: { title: "About" }, component: About }
 ```
 
-`title` can also be a function that receives [`GuardContext`](../api/svelte#types)
-and runs before the component renders — useful for dynamic titles from URL params:
+`metadata` can also be a synchronous function of
+[`MetadataContext`](../api/core#metadata-types) — useful for dynamic titles
+from URL params:
 
 ```ts
 {
   path: "users/:id",
-  title: (ctx) => `User #${ctx.params.id}`,
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
   component: lazy(() => import("./User.svelte")),
 }
 ```
+
+`RouteMetadata` is empty by default — the `declare module` augmentation above
+is required before `router.metadata.title` type-checks, and it must always
+target `"@isorouter/core"`, never `"@isorouter/svelte"`. Read it with the
+`metadata` getter on the router returned by [`getRouter()`](#getrouter):
+
+```svelte
+<script lang="ts">
+  import { getRouter } from "@isorouter/svelte";
+
+  const router = getRouter();
+
+  $effect(() => {
+    if (router.metadata.title) document.title = router.metadata.title;
+  });
+</script>
+```
+
+isorouter never touches `document` itself — see [Metadata &
+SEO](../guide/metadata) for the merge rule and more recipes, including the
+simpler `onCommit` option.
 
 ## Module augmentation
 

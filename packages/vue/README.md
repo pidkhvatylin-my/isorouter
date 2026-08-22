@@ -136,6 +136,42 @@ instance provided there).
 - **`useLocation()`** — a `ComputedRef<URL>` of the current location.
 - **`useNavigate()`** — `(to, opts?: { replace?: boolean; state?: unknown }) => void`
   delegating to `router.navigate`.
+- **`useMetadata()`** — a `ComputedRef<RouteMetadata>` of `snapshot.metadata`.
+
+## Route metadata
+
+Routes accept an optional `metadata` — an arbitrary bag, shallow-merged
+root → leaf over the matched chain, that the router carries but never
+interprets. `RouteMetadata` is empty by default; declare your own schema
+against `@isorouter/core` (never `@isorouter/vue`) before reading it:
+
+```ts
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
+const router = createRouter([
+  { path: "about", metadata: { title: "About" }, component: About },
+] as const);
+```
+
+```vue
+<script setup lang="ts">
+import { watchEffect } from "vue";
+import { useMetadata } from "@isorouter/vue";
+
+const metadata = useMetadata();
+watchEffect(() => {
+  if (metadata.value.title) document.title = metadata.value.title;
+});
+</script>
+```
+
+isorouter never touches `document` itself — see the
+[Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
+for the merge rule and more recipes, including the simpler `onCommit` option.
 
 ## Type-safe navigation
 

@@ -19,11 +19,15 @@ npm install @isorouter/svelte
 | `getRouter`        | function  | Reads the `SvelteRouter` from context (within `<Router>`/`<Outlet>`). |
 | `lazy`             | function  | Re-exported from `@isorouter/core`.                                   |
 
+`SvelteRouter` also exposes a `metadata` getter — `router.metadata` returns
+`snapshot.metadata` and subscribes like `router.current` does.
+
 ## Types
 
 `AnySvelteRouter`, `SvelteComponentType`, `Register`, `RegisteredRouter`, plus
-the core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`,
-`RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+the core re-exports `BeforeLoad`, `GuardContext`, `Href`, `MetadataContext`,
+`NavTarget`, `RouteConfig`, `RouteMetadata`, `RouteMetadataInput`,
+`RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `getRouter()` to the concrete router type — see
 [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).

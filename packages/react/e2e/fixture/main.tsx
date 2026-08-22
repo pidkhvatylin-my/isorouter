@@ -11,7 +11,13 @@ import {
 } from "../../src/index";
 
 import type { ReactComponentType } from "../../src/index";
-import type { GuardContext, RouteConfig } from "@isorouter/core";
+import type { MetadataContext, RouteConfig } from "@isorouter/core";
+
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
 
 function Home() {
   return (
@@ -68,24 +74,26 @@ function RedirectTarget() {
 }
 
 const routes = [
-  { path: "/", component: Home, title: "Home" },
-  { path: "about", component: About, title: "About" },
+  { path: "/", component: Home, metadata: { title: "Home" } },
+  { path: "about", component: About, metadata: { title: "About" } },
   {
     path: "concerts/:city",
     component: Concerts,
-    title: (ctx: GuardContext) => `Concerts in ${ctx.params.city}`,
+    metadata: (ctx: MetadataContext) => ({
+      title: `Concerts in ${ctx.params.city}`,
+    }),
   },
   { path: "users/:id", component: lazy(() => import("./pages/User")) },
   {
     path: "dashboard",
     component: DashboardLayout,
-    title: "Dashboard",
+    metadata: { title: "Dashboard" },
     children: [
       { index: true, component: Overview },
       {
         path: "settings",
         component: Settings,
-        title: "Dashboard - Settings",
+        metadata: { title: "Dashboard - Settings" },
       },
     ],
   },
@@ -95,7 +103,11 @@ const routes = [
   { path: "blocked", beforeLoad: () => false, component: Home },
 ] as const satisfies readonly RouteConfig<ReactComponentType>[];
 
-const router = createRouter(routes);
+const router = createRouter(routes, {
+  onCommit: (s) => {
+    if (s.metadata.title) document.title = s.metadata.title;
+  },
+});
 
 function App() {
   return (
