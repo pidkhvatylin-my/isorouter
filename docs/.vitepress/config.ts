@@ -91,6 +91,7 @@ export default defineConfig({
             { text: "Navigation guards", link: "/guide/guards" },
             { text: "Lazy loading", link: "/guide/lazy-loading" },
             { text: "Nested layouts", link: "/guide/nested-layouts" },
+            { text: "Metadata & SEO", link: "/guide/metadata" },
             { text: "Links & active state", link: "/guide/links" },
             {
               text: "Type-safe navigation",

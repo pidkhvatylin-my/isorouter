@@ -47,13 +47,20 @@ import DashboardLayout from "./DashboardLayout.svelte";
 import Overview from "./Overview.svelte";
 import Settings from "./Settings.svelte";
 
+// Metadata schema — always augmented against "@isorouter/core", even here
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
 export const router = createRouter([
   {
     path: "/",
     component: AppLayout,
     children: [
-      { index: true, title: "Home", component: Home },
-      { path: "about", title: "About", component: About },
+      { index: true, metadata: { title: "Home" }, component: Home },
+      { path: "about", metadata: { title: "About" }, component: About },
       {
         path: "dashboard",
         component: DashboardLayout,
@@ -177,16 +184,42 @@ Reads the `SvelteRouter` instance from context. Must be used within `<Router>`
 once nothing reads it. `router.navigate`, `router.back`, `router.forward` and
 `router.isActive` are also available on the instance.
 
-## Route `title`
+## Route metadata
 
-Routes accept an optional `title` — a string or a function:
+Routes accept an optional `metadata` — an arbitrary bag, shallow-merged
+root → leaf over the matched chain, that the router carries but never
+interprets. `RouteMetadata` is empty by default; declare your own schema
+against `@isorouter/core` (see Quick start above) before reading it.
 
 ```ts
-{ path: "about", title: "About", component: About }
+{ path: "about", metadata: { title: "About" }, component: About }
 
-// Dynamic — receives GuardContext with params, url, signal
-{ path: "users/:id", title: (ctx) => `User #${ctx.params.id}`, component: User }
+// Dynamic — receives MetadataContext with params, url, pathname
+{
+  path: "users/:id",
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
+  component: User,
+}
 ```
+
+Read it via the `metadata` getter on the router returned by `getRouter()`,
+and apply it via the built-in `<svelte:head>`:
+
+```svelte
+<script lang="ts">
+  import { getRouter } from "@isorouter/svelte";
+
+  const router = getRouter();
+</script>
+
+<svelte:head>
+  <title>{router.metadata.title ?? "My app"}</title>
+</svelte:head>
+```
+
+isorouter never touches `document` itself — see the
+[Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
+for the merge rule and more recipes, including the simpler `onCommit` option.
 
 ## Type-safe navigation
 

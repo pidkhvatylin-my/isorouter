@@ -126,6 +126,40 @@ All hooks must be used within `<Router>`.
 - **`useNavigate()`** — a referentially stable
   `(to, opts?: { replace?: boolean; state?: unknown }) => void` bound to
   `router.navigate`.
+- **`useMetadata()`** — `snapshot.metadata`, re-rendering on every commit.
+
+## Route metadata
+
+Routes accept an optional `metadata` — an arbitrary bag, shallow-merged
+root → leaf over the matched chain, that the router carries but never
+interprets. `RouteMetadata` is empty by default; declare your own schema
+against `@isorouter/core` (never `@isorouter/react`) before reading it:
+
+```tsx
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
+const router = createRouter([
+  { path: "about", metadata: { title: "About" }, component: About },
+] as const);
+
+function Head() {
+  const metadata = useMetadata();
+
+  return <title>{metadata.title ?? "My app"}</title>;
+}
+```
+
+React 19 hoists a `<title>` rendered anywhere in the tree into `<head>`. On
+React 18 there's no hoisting — fall back to a `useEffect` writing
+`document.title` directly.
+
+isorouter never touches `document` itself — see the
+[Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
+for the merge rule and more recipes, including the simpler `onCommit` option.
 
 ## Type-safe navigation
 

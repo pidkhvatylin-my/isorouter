@@ -5,6 +5,7 @@ import { createRouter } from "../src/createRouter";
 import { RouterContext } from "../src/context";
 import {
   useLocation,
+  useMetadata,
   useNavigate,
   useParams,
   useRouter,
@@ -135,6 +136,27 @@ describe("useLocation", () => {
     });
 
     expect(result.current.pathname).toBe("/about");
+  });
+});
+
+describe("useMetadata", () => {
+  it("returns the merged metadata and updates it across navigations", async () => {
+    const router = createRouter(routes);
+    router.start();
+    await flush();
+
+    const { result } = renderHook(() => useMetadata(), {
+      wrapper: wrapperFor(router),
+    });
+
+    expect(result.current).toEqual({ title: "Home" });
+
+    await act(async () => {
+      router.navigate("/about");
+      await flush();
+    });
+
+    expect(result.current).toEqual({});
   });
 });
 

@@ -134,11 +134,17 @@ const router = createRouter([{ path: "/", component: Home }] as const);
 
 ## API (shared across adapters)
 
-- **Route config**: `{ path?, index?, component?, beforeLoad?, title?, children? }`
+- **Route config**: `{ path?, index?, component?, beforeLoad?, metadata?, children? }`
   — `component` may be a value or `lazy(() => import(...))`.
 - **Guards**: `beforeLoad(ctx)` runs root→leaf. Return `false` to block (restores
   current URL), a `string` to redirect, or nothing to allow. `ctx.signal` aborts
   when the navigation is superseded.
+- **Metadata**: `metadata` is an arbitrary bag (a value or a sync function of
+  `{ params, url, pathname }`), shallow-merged root→leaf into
+  `snapshot.metadata`. The router carries and merges it but never interprets
+  it — `RouteMetadata` is an empty interface you augment yourself against
+  `@isorouter/core`, and applying it (`document.title`, a head library) is
+  your app's job, e.g. via `onCommit`.
 - **Nested layouts**: parent `component` + `children`; render the child with
   `<Outlet />` (Svelte/React) / `<Outlet />` component (Vue). Layout instances
   persist across child navigations because component identity is stable.

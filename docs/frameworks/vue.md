@@ -171,6 +171,7 @@ provided there).
 | `useParams()`        | a `ComputedRef<Record<string, string>>` of the current params.        |
 | `useLocation()`      | a `ComputedRef<URL>` of the current location.                          |
 | `useNavigate()`      | `(to, opts?) => void` delegating to `router.navigate`.                 |
+| `useMetadata()`      | a `ComputedRef<RouteMetadata>` of `snapshot.metadata`.                 |
 
 ```vue
 <script setup lang="ts">
@@ -189,6 +190,58 @@ const navigate = useNavigate();
 
 `useRouterState()`'s subscription is torn down automatically via
 `onScopeDispose`.
+
+## Route metadata
+
+A route can declare `metadata` — an arbitrary bag, shallow-merged root → leaf
+over the matched chain, that the router carries but never interprets:
+
+```ts
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
+{ path: "about", metadata: { title: "About" }, component: About }
+```
+
+`metadata` can also be a synchronous function of
+[`MetadataContext`](../api/core#metadata-types) — useful for dynamic titles
+from URL params:
+
+```ts
+{
+  path: "users/:id",
+  metadata: (ctx) => ({ title: `User #${ctx.params.id}` }),
+  component: lazy(() => import("./User.vue")),
+}
+```
+
+`RouteMetadata` is empty by default — the `declare module` augmentation above
+is required before `snapshot.metadata.title` (or `useMetadata().value.title`)
+type-checks, and it must always target `"@isorouter/core"`, never
+`"@isorouter/vue"`. Vue 3 has no built-in head API — read it with
+`useMetadata()` and apply it with `watchEffect`, the dependency-free option:
+
+```vue
+<script setup lang="ts">
+import { watchEffect } from "vue";
+import { useMetadata } from "@isorouter/vue";
+
+const metadata = useMetadata();
+watchEffect(() => {
+  if (metadata.value.title) document.title = metadata.value.title;
+});
+</script>
+```
+
+For `<meta>` / `<link>` tags, dedupe rules, or anything beyond a plain
+title, reach for `useHead()` from `@unhead/vue` or `@vueuse/head` instead.
+
+isorouter never touches `document` itself — see [Metadata &
+SEO](../guide/metadata) for the merge rule and more recipes, including the
+simpler `onCommit` option.
 
 ## Module augmentation
 

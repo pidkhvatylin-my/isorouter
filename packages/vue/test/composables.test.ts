@@ -6,6 +6,7 @@ import { createRouter } from "../src/createRouter";
 import { RouterKey } from "../src/context";
 import {
   useLocation,
+  useMetadata,
   useNavigate,
   useParams,
   useRouter,
@@ -138,6 +139,21 @@ describe("useLocation", () => {
     router.navigate("/about");
     await flushPromises();
     expect(location.value.pathname).toBe("/about");
+  });
+});
+
+describe("useMetadata", () => {
+  it("exposes the merged metadata and updates it across navigations", async () => {
+    const router = createRouter(routes);
+    const { result: metadata } = mountWithRouter(router, () => useMetadata());
+
+    router.start();
+    await flushPromises();
+    expect(metadata.value).toEqual({ title: "Home" });
+
+    router.navigate("/about");
+    await flushPromises();
+    expect(metadata.value).toEqual({});
   });
 });
 

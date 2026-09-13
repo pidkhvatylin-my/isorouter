@@ -3,7 +3,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { useRouterInstance } from "./context";
 
 import type { ReactComponentType, RegisteredRouter } from "./types";
-import type { RouterSnapshot } from "@isorouter/core";
+import type { RouteMetadata, RouterSnapshot } from "@isorouter/core";
 
 export function useRouterState(): RouterSnapshot<ReactComponentType> {
   const router = useRouterInstance();
@@ -23,6 +23,10 @@ export function useParams<
 
 export function useLocation(): URL {
   return useRouterState().url;
+}
+
+export function useMetadata(): RouteMetadata {
+  return useRouterState().metadata;
 }
 
 export function useRouter(): RegisteredRouter {

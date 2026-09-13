@@ -20,12 +20,14 @@ npm install @isorouter/vue
 | `useParams`       | composable  | `ComputedRef<Record<string, string>>`.                               |
 | `useLocation`     | composable  | `ComputedRef<URL>`.                                                   |
 | `useNavigate`     | composable  | `(to, opts?) => void` delegating to `router.navigate`.               |
+| `useMetadata`     | composable  | `ComputedRef<RouteMetadata>` of `snapshot.metadata`.                  |
 | `lazy`            | function    | Re-exported from `@isorouter/core`.                                   |
 
 ## Types
 
 `AnyVueRouter`, `VueComponentType`, `Register`, `RegisteredRouter`, plus the
-core re-exports `BeforeLoad`, `GuardContext`, `Href`, `NavTarget`, `RouteConfig`,
+core re-exports `BeforeLoad`, `GuardContext`, `Href`, `MetadataContext`,
+`NavTarget`, `RouteConfig`, `RouteMetadata`, `RouteMetadataInput`,
 `RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete

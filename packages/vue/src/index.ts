@@ -3,8 +3,11 @@ export type {
   BeforeLoad,
   GuardContext,
   Href,
+  MetadataContext,
   NavTarget,
   RouteConfig,
+  RouteMetadata,
+  RouteMetadataInput,
   RouterOptions,
   RouterSnapshot,
 } from "@isorouter/core";
@@ -18,6 +21,7 @@ export {
   useRouterState,
   useParams,
   useLocation,
+  useMetadata,
   useNavigate,
 } from "./composables";
 export type {

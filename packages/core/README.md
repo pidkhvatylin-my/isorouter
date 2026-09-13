@@ -97,6 +97,8 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  /** Shallow-merged metadata from the matched chain, root → leaf. */
+  metadata: RouteMetadata;
 }
 ```
 
@@ -116,7 +118,7 @@ interface RouteConfig<C = unknown> {
   index?: boolean;
   component?: C | LazyComponent<C>;
   beforeLoad?: BeforeLoad;
-  title?: string | ((ctx: GuardContext) => string);
+  metadata?: RouteMetadata | ((ctx: MetadataContext) => RouteMetadata);
   children?: readonly RouteConfig<C>[];
 }
 ```
@@ -132,8 +134,43 @@ interface RouteConfig<C = unknown> {
   pass-through layouts) but contribute nothing to `snapshot.components`.
 - **`children`** — nested routes. A matched parent with no matching child
   still resolves on its own if the path is fully consumed.
-- **`title`** — sets `document.title` on commit. The deepest route in the
-  matched chain that defines a `title` wins.
+- **`metadata`** — a value, or a synchronous function of `MetadataContext`
+  (`{ params, url, pathname }`). Shallow-merged **root → leaf** into
+  `snapshot.metadata` (child keys override parent keys). The router carries
+  and merges this bag but never interprets it — see [Metadata](#metadata)
+  below.
+
+## Metadata
+
+`RouteMetadata` ships as an **empty** declaration-merging interface — nothing
+is privileged by core, not even `title`. Declare your own schema before any
+field is readable, always against `@isorouter/core` even if you're using an
+adapter:
+
+```ts
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+    description?: string;
+  }
+}
+```
+
+Metadata functions must be **synchronous and pure** — they run just before
+the final commit emit, so they never fire for a blocked, redirected or
+aborted navigation. Since the core never touches `document`, applying
+metadata is your app's job, most simply via `onCommit`:
+
+```ts
+const router = createCoreRouter(routes, {
+  onCommit: (snapshot) => {
+    if (snapshot.metadata.title) document.title = snapshot.metadata.title;
+  },
+});
+```
+
+See the [Metadata & SEO guide](https://pidkhvatylin-my.github.io/isorouter/guide/metadata)
+for the full merge rule and more recipes.
 
 ## Guards
 
@@ -221,6 +258,9 @@ interface RouterOptions {
   onCommit?: (snapshot: RouterSnapshot<unknown>) => void;
 }
 ```
+
+`onCommit` is the primary place to apply `snapshot.metadata`, since the core
+never touches `document` — see [Metadata](#metadata) above.
 
 ## License
 

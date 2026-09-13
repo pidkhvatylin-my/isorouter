@@ -12,9 +12,11 @@ import { matchRoutes } from "./matcher";
 
 import type {
   GuardContext,
+  MetadataContext,
   NavTarget,
   NavigationKind,
   RouteConfig,
+  RouteMetadata,
   RouterOptions,
   RouterSnapshot,
 } from "./types";
@@ -25,6 +27,7 @@ export type Unsubscribe = () => void;
 
 const NOOP = () => undefined;
 const SAFE_ORIGIN = "http://localhost/";
+const EMPTY_METADATA: RouteMetadata = {};
 
 function initialUrl(): URL {
   return new URL(typeof location !== "undefined" ? location.href : SAFE_ORIGIN);
@@ -76,6 +79,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       url: initialUrl(),
       status: "idle",
       error: null,
+      metadata: EMPTY_METADATA,
     };
   }
 
@@ -207,6 +211,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
           url,
           status: "not-found",
           error: null,
+          metadata: EMPTY_METADATA,
         });
         return;
       }
@@ -252,15 +257,17 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
       const components = await this.#resolve(matched.chain);
       if (abortController.signal.aborted) return;
 
+      const metadata = this.#buildMetadata(matched.chain, ctx);
+
       this.#emit({
         components,
         params: matched.params,
         url,
         status: "idle",
         error: null,
+        metadata,
       });
 
-      this.#applyTitle(matched.chain, ctx);
       this.#options.onCommit?.(this.#snapshot);
     } catch (err) {
       if (abortController.signal.aborted) return;
@@ -271,6 +278,7 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
         url,
         status: "error",
         error: err,
+        metadata: EMPTY_METADATA,
       });
       this.#options.onError?.(err);
     }
@@ -295,18 +303,18 @@ export class Router<const T extends readonly RouteConfig<C>[], C = unknown> {
     );
   }
 
-  #applyTitle(chain: RouteConfig<C>[], ctx: GuardContext): void {
-    if (typeof document === "undefined") return;
+  #buildMetadata(chain: RouteConfig<C>[], ctx: MetadataContext): RouteMetadata {
+    let out: RouteMetadata | null = null;
 
-    for (let i = chain.length - 1; i >= 0; i--) {
-      const t = chain[i]!.title;
+    for (const route of chain) {
+      const m = route.metadata;
 
-      if (t == null) continue;
+      if (m == null) continue;
 
-      document.title = typeof t === "function" ? t(ctx) : t;
-
-      return;
+      out = { ...(out ?? {}), ...(typeof m === "function" ? m(ctx) : m) };
     }
+
+    return out ?? EMPTY_METADATA;
   }
 }
 

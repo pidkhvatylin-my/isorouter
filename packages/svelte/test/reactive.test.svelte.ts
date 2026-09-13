@@ -100,6 +100,21 @@ describe("isActive", () => {
   });
 });
 
+describe("metadata", () => {
+  it("exposes the merged metadata and updates it across navigations", async () => {
+    const router = createRouter(routes);
+    router.start();
+    await flush();
+
+    expect(router.metadata).toEqual({ title: "Home" });
+
+    router.navigate("/about");
+    await flush();
+
+    expect(router.metadata).toEqual({});
+  });
+});
+
 describe("current", () => {
   it("returns a referentially stable snapshot between commits", () => {
     const router = createRouter(routes);

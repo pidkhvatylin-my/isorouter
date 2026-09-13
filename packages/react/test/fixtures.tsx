@@ -4,6 +4,12 @@ import { useParams } from "../src/hooks";
 import type { ReactComponentType } from "../src/index";
 import type { RouteConfig } from "@isorouter/core";
 
+declare module "@isorouter/core" {
+  interface RouteMetadata {
+    title?: string;
+  }
+}
+
 export function Home() {
   return <p data-testid="page">home</p>;
 }
@@ -35,7 +41,7 @@ export function Settings() {
 }
 
 export const routes = [
-  { path: "/", component: Home },
+  { path: "/", component: Home, metadata: { title: "Home" } },
   { path: "about", component: About },
   { path: "concerts/:city", component: Concerts },
   {

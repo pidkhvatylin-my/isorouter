@@ -20,13 +20,15 @@ npm install @isorouter/react
 | `useParams`       | hook      | `snapshot.params`, typed as `P`.                                      |
 | `useLocation`     | hook      | `snapshot.url`.                                                       |
 | `useNavigate`     | hook      | Referentially-stable `(to, opts?) => void`.                          |
+| `useMetadata`     | hook      | `snapshot.metadata`, re-rendering on every commit.                    |
 | `lazy`            | function  | Re-exported from `@isorouter/core`.                                   |
 
 ## Types
 
 `RouterProps`, `LinkProps`, `AnyReactRouter`, `ReactComponentType`, `Register`,
 `RegisteredRouter`, plus the core re-exports `BeforeLoad`, `GuardContext`,
-`Href`, `NavTarget`, `RouteConfig`, `RouterOptions`, `RouterSnapshot`.
+`Href`, `MetadataContext`, `NavTarget`, `RouteConfig`, `RouteMetadata`,
+`RouteMetadataInput`, `RouterOptions`, `RouterSnapshot`.
 
 Augment `Register` to narrow `useRouter()` and `useNavigate()` to the concrete
 router type — see [Type-safe navigation](../guide/type-safe-navigation#module-augmentation).

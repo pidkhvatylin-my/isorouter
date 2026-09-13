@@ -11,7 +11,7 @@ interface Route {
   index?: boolean;
   component?: unknown; // a value or lazy(() => import(...))
   beforeLoad?: unknown;
-  title?: string | ((ctx: unknown) => string);
+  metadata?: unknown; // a value or ((ctx: MetadataContext) => value)
   children?: readonly Route[];
 }
 ```
@@ -84,6 +84,9 @@ with no matching child still resolves on its own if the path is fully consumed.
 Every commit produces an immutable `RouterSnapshot`:
 
 ```ts twoslash
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface RouteMetadata {}
+// ---cut---
 interface RouterSnapshot<C> {
   /** Matched chain's components, root → leaf (routes with no component removed). */
   components: C[];
@@ -91,6 +94,8 @@ interface RouterSnapshot<C> {
   url: URL;
   status: "idle" | "navigating" | "not-found" | "error";
   error: unknown;
+  /** Shallow-merged metadata from the matched chain, root → leaf. */
+  metadata: RouteMetadata;
 }
 ```
 
@@ -100,22 +105,12 @@ interface RouterSnapshot<C> {
 
 See the [core API reference](../api/core) for the full surface.
 
-## Setting the document title
+## Route metadata
 
-A route can set `document.title` on commit via `title` — a string or a function
-of the guard context. The **deepest** route in the matched chain that defines a
-`title` wins:
-
-```ts twoslash
-import { createCoreRouter } from "@isorouter/core";
-
-declare const User: unknown;
-// ---cut---
-const router = createCoreRouter([
-  {
-    path: "/users/:id",
-    component: User,
-    title: (ctx) => `User ${ctx.params.id}`,
-  },
-] as const);
-```
+A route can carry arbitrary `metadata` — a value, or a function of
+[`MetadataContext`](../api/core#metadata-types)
+— that the router shallow-merges **root → leaf** into `snapshot.metadata`. The
+router only carries and merges this bag; it never interprets it, so applying a
+`title` (or any other field) to the document is your app's job. See
+[Metadata & SEO](./metadata) for the full guide, including the required
+`declare module` setup.
